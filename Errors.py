@@ -23,7 +23,7 @@ class LexicalError(BaseCalcError):
             return f"Lexical Error: {self._error_msg} at position: {self._error_pos[0]} \n"
         # check if the error msg is of invalud input
         elif self._error_pos[0] == -1:
-            return f"Lexical Error: {self._error_msg} ]+\n"
+            return f"Lexical Error: {self._error_msg} \n"
         # the rest of the error msgs
         return f"Lexical Error: {self._error_msg} at position: {self._error_pos[0]} -> {self._error_pos[1]} \n"
 
