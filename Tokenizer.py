@@ -1,3 +1,7 @@
+from ErrorHandler import ErrorHandler
+from Errors import *
+
+
 class Tokenizer:
     """
     This class will check the input for invalid chars and will remove spaces
@@ -6,7 +10,7 @@ class Tokenizer:
     2. Invalid Number format in expression ie 1234.. or 123.
     """
 
-    def __init__(self, input_expression: str):
+    def __init__(self, error_handler: ErrorHandler, input_expression: str):
         self._exp = input_expression
         # String to hold all valid tokens in the calc
         self._valid_tokens = "1234567890.+-*/&^%$@~!()"
@@ -15,7 +19,9 @@ class Tokenizer:
         # pattern for all valid numbers
         self._number_pattern = "1234567890."
         # dict to hold all the operator precedences
-        self._operator_precedence_table = {"Error": -1, "Number": 0, "Plus": 1, "Minus": 1, "Multiplication": 2,
+        self._operator_precedence_table = {"Invalid_Chars_Error": -1, "Invalid_Char_Error": -1, "Number_Error": -1,
+                                           "Empty_Input_Error": -1, "Number": 0,
+                                           "Plus": 1, "Minus": 1, "Multiplication": 2,
                                            "Division": 3, "Power": 4, "Unary_Minus": 5,
                                            "Modulo": 6, "Avg": 7, "Max": 7, "Min": 7, "Negative": 8,
                                            "Factorial": 8, "Close_Paren": 9, "Open_Paren": 9}
@@ -23,6 +29,10 @@ class Tokenizer:
         self._operators = {'+': "Plus", '*': "Multiplication", '/': "Division", '^': "Power", '!': "Factorial",
                            '~': "Negative", '@': "Avg", '%': "Modulo", '&': "Min", '$': "Max"}
         self._paren = {'(': "Open_Paren", ')': "Close_Paren"}
+        self._errors = {"Invalid_Chars_Error": "Invalid Chars found: ", "Invalid_Char_Error": "Invalid Char found: ",
+                        "Number_Error": "Invalid Number Format: ",
+                        "Empty_Input_Error": "Invalid Input, The input must contain an expression"}
+        self._error_handler = error_handler
 
     def tokenize_expression(self):
         """
@@ -48,7 +58,7 @@ class Tokenizer:
                         last_token_type = "Number"
                     else:
                         # invalid token type
-                        last_token_type = "Error"
+                        last_token_type = "Number_Error"
                 # check if the char is an operator (not including minus)
                 elif char in "+*/^%$@!~":
                     last_token_type = self._operators[char]
@@ -67,10 +77,11 @@ class Tokenizer:
                     last_token_type = self._paren[char]
                 else:
                     # error because the char is not a valid token
-                    last_token_type = "Error"
+                    last_token_type = "Invalid_Char_Error"
                     current_token += char
                     cur_pos += 1
                     while cur_pos < len(cleaned_exp) and cleaned_exp[cur_pos] not in self._valid_tokens:
+                        last_token_type = "Invalid_Chars_Error"
                         current_token += cleaned_exp[cur_pos]
                         cur_pos += 1
                     cur_pos -= 1
@@ -78,18 +89,23 @@ class Tokenizer:
                 ending_index = cur_pos
                 # add the token
                 self._token_list.append(
-                    Token(last_token_type, current_token, self._operator_precedence_table[last_token_type], starting_index,
+                    Token(last_token_type, current_token, self._operator_precedence_table[last_token_type],
+                          starting_index,
                           ending_index)
                 )
-                cur_pos += 1
+                # check if I need to add an error
+                if last_token_type in self._errors.keys():
+                    self._error_handler.add_error(
+                        LexicalError(self._errors[last_token_type] + current_token, (starting_index, ending_index)))
+                # reset
                 current_token = ""
-        else:
-            self._token_list.append(
-                Token("Error", "-1", self._operator_precedence_table["Error"], -1,
-                      -1)
-            )
+                cur_pos += 1
 
-    def get_number_token(self, cleaned_exp : str, starting_index: int, current_token: str):
+        else:
+            # add an empty input error
+            self._error_handler.add_error(LexicalError(self._errors["Empty_Input_Error"], (-1, -1)))
+
+    def get_number_token(self, cleaned_exp: str, starting_index: int, current_token: str):
         """
         :param cleaned_exp:
         :param starting_index:
@@ -122,7 +138,8 @@ class Token:
     This class is used to hold information about the different tokens
     """
 
-    def __init__(self, token_type : str, token_value: str, token_precedence: int, starting_index : int, ending_index : int):
+    def __init__(self, token_type: str, token_value: str, token_precedence: int, starting_index: int,
+                 ending_index: int):
         self._token_type = token_type
         self._token_value = token_value
         self._precedence = token_precedence
@@ -135,8 +152,11 @@ class Token:
 
 
 def main():
-    tokens = Tokenizer(input_expression=input("Enter an expression: "))
+    error_handler = ErrorHandler()
+    tokens = Tokenizer(error_handler, input_expression=input("Enter an expression: "))
     tokens.tokenize_expression()
+    if error_handler.has_errors():
+        error_handler.show_errors()
     for token in tokens.get_tokens():
         print(token)
 

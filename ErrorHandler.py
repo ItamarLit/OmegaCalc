@@ -25,7 +25,7 @@ class ErrorHandler:
         :return: Prints all the errors to the CLI
         """
         for error in self._errorList:
-            print(error + "\n")
+            print(error)
 
     def clear_errors(self):
         """
