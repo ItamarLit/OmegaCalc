@@ -10,8 +10,7 @@ class Tokenizer:
     2. Invalid Number format in expression ie 1234.. or 123.
     """
 
-    def __init__(self, error_handler: ErrorHandler, input_expression: str):
-        self._exp = input_expression
+    def __init__(self, error_handler: ErrorHandler):
         # String to hold all valid tokens in the calc
         self._valid_tokens = "1234567890.+-*/&^%$@~!()"
         # list to hold all tokens, valid and invalid
@@ -34,12 +33,12 @@ class Tokenizer:
                         "Empty_Input_Error": "Invalid Input, The input must contain an expression"}
         self._error_handler = error_handler
 
-    def tokenize_expression(self):
+    def tokenize_expression(self, exp):
         """
         :return: This func will add tokens to the token list of the tokenizer
         """
         # remove all white spaces and turn the expression into a list
-        cleaned_exp = ''.join(self._exp.split())
+        cleaned_exp = ''.join(exp.split())
         # check for an empty expression
         if cleaned_exp:
             current_token = ""
@@ -132,6 +131,9 @@ class Tokenizer:
     def get_tokens(self):
         return self._token_list
 
+    def clear_tokens(self):
+        self._token_list = []
+
 
 class Token:
     """
@@ -150,16 +152,13 @@ class Token:
         return f"Token_type: {self._token_type} , Token_value: {self._token_value} , Token_precedence: {self._precedence} ," \
                f" Token starts at: {self._starting_index} and ends at: {self._ending_index}"
 
+    def get_type(self):
+        return self._token_type
 
-def main():
-    error_handler = ErrorHandler()
-    tokens = Tokenizer(error_handler, input_expression=input("Enter an expression: "))
-    tokens.tokenize_expression()
-    if error_handler.has_errors():
-        error_handler.show_errors()
-    for token in tokens.get_tokens():
-        print(token)
+    def get_value(self):
+        return self._token_value
+
+    def get_predcedence(self):
+        return self._precedence
 
 
-if __name__ == '__main__':
-    main()
