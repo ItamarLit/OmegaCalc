@@ -15,9 +15,10 @@ def main():
         else:
             for token in tokenizer.get_tokens():
                 print(token)
-            converter.convert(tokenizer.get_tokens())
-            tokenizer.clear_tokens()
-            print(converter.get_rpn())
+            #converter.convert(tokenizer.get_tokens())
+        tokenizer.clear_tokens()
+        error_handler.clear_errors()
+            #print(converter.get_rpn())
 
 
 if __name__ == '__main__':

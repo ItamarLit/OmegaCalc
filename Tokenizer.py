@@ -21,7 +21,7 @@ class Tokenizer:
         self._operator_precedence_table = {"Invalid_Chars_Error": -1, "Invalid_Char_Error": -1, "Number_Error": -1,
                                            "Empty_Input_Error": -1, "Number": 0,
                                            "Plus": 1, "Minus": 1, "Multiplication": 2,
-                                           "Division": 3, "Power": 4, "Unary_Minus": 5,
+                                           "Division": 2, "Power": 4, "Unary_Minus": 5,
                                            "Modulo": 6, "Avg": 7, "Max": 7, "Min": 7, "Negative": 8,
                                            "Factorial": 8, "Close_Paren": 9, "Open_Paren": 9}
         # dict to hold operator and token type values except for minus
@@ -66,7 +66,8 @@ class Tokenizer:
                 elif char == '-':
                     current_token = char
                     # check for unary minus
-                    if last_token_type == "" or (last_token_type != "Close_Paren" and last_token_type != "Number"):
+                    if last_token_type == "" or (
+                            last_token_type != "Close_Paren" and last_token_type != "Number" and last_token_type != "Factorial"):
                         last_token_type = "Unary_Minus"
                     else:
                         last_token_type = "Minus"
@@ -99,10 +100,21 @@ class Tokenizer:
                 # reset
                 current_token = ""
                 cur_pos += 1
-
         else:
             # add an empty input error
             self._error_handler.add_error(LexicalError(self._errors["Empty_Input_Error"], (-1, -1)))
+
+        # now finished lexing check if the first or last tokens are valid ops
+        valid_start, valid_end = self.check_start_and_end()
+
+        if valid_start:
+            self._error_handler.add_error(LexicalError(f"Invalid starting operator: "
+                                                       f"{self._token_list[0].get_value()}",
+                                                       self._token_list[0].get_pos()))
+        if valid_end:
+            self._error_handler.add_error(LexicalError(f"Invalid ending operator: "
+                                                       f"{self._token_list[-1].get_value()}",
+                                                       self._token_list[-1].get_pos()))
 
     def get_number_token(self, cleaned_exp: str, starting_index: int, current_token: str):
         """
@@ -127,6 +139,15 @@ class Tokenizer:
         if number_value.count('.') <= 1 and not number_value.startswith('.') and not number_value.endswith('.'):
             return True
         return False
+
+    def check_start_and_end(self):
+        valid_start = True
+        valid_end = True
+        if self._token_list[0].get_value() not in "-~" and self._token_list[0].get_value() in "+*/^&%$@!":
+            valid_start = False
+        if self._token_list[-1].get_value() != "!" and self._token_list[-1].get_value() in "+*/^&%$@!-~":
+            valid_end = False
+        return valid_start, valid_end
 
     def get_tokens(self):
         return self._token_list
@@ -158,7 +179,8 @@ class Token:
     def get_value(self):
         return self._token_value
 
-    def get_predcedence(self):
+    def get_precedence(self):
         return self._precedence
 
-
+    def get_pos(self):
+        return self._starting_index, self._ending_index

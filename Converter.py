@@ -6,6 +6,7 @@ class Converter:
         self._error_handler = error_handler
         self._output_lst = []
         self._op_stack = []
+        self.binary_minus_stack = []
 
     def convert(self, token_list):
         # convert infix token list to post fix
@@ -20,7 +21,7 @@ class Converter:
                 # remove (
                 self._op_stack.pop()
             else:
-                while len(self._op_stack) != 0 and token.get_predcedence() <= self._op_stack[-1].get_predcedence() and self._op_stack[-1].get_value() != "(":
+                while len(self._op_stack) != 0 and token.get_predcedence() <= self._op_stack[-1].get_precedence() and self._op_stack[-1].get_value() != "(":
                     self._output_lst.append(self._op_stack.pop().get_value())
                 self._op_stack.append(token)
         while len(self._op_stack) != 0:
