@@ -1,3 +1,7 @@
+from ErrorHandler import ErrorHandler
+from Errors import *
+
+
 class Tokenizer:
     """
     This class will check the input for invalid chars and will remove spaces
@@ -6,8 +10,7 @@ class Tokenizer:
     2. Invalid Number format in expression ie 1234.. or 123.
     """
 
-    def __init__(self, input_expression: str):
-        self._exp = input_expression
+    def __init__(self, error_handler: ErrorHandler):
         # String to hold all valid tokens in the calc
         self._valid_tokens = "1234567890.+-*/&^%$@~!()"
         # list to hold all tokens, valid and invalid
@@ -15,21 +18,27 @@ class Tokenizer:
         # pattern for all valid numbers
         self._number_pattern = "1234567890."
         # dict to hold all the operator precedences
-        self._operator_precedence_table = {"Error": -1, "Number": 0, "Plus": 1, "Minus": 1, "Multiplication": 2,
-                                           "Division": 3, "Power": 4, "Unary_Minus": 5,
+        self._operator_precedence_table = {"Invalid_Chars_Error": -1, "Invalid_Char_Error": -1, "Number_Error": -1,
+                                           "Empty_Input_Error": -1, "Number": 0,
+                                           "Plus": 1, "Minus": 1, "Multiplication": 2,
+                                           "Division": 2, "Power": 4, "Unary_Minus": 5,
                                            "Modulo": 6, "Avg": 7, "Max": 7, "Min": 7, "Negative": 8,
                                            "Factorial": 8, "Close_Paren": 9, "Open_Paren": 9}
         # dict to hold operator and token type values except for minus
         self._operators = {'+': "Plus", '*': "Multiplication", '/': "Division", '^': "Power", '!': "Factorial",
                            '~': "Negative", '@': "Avg", '%': "Modulo", '&': "Min", '$': "Max"}
         self._paren = {'(': "Open_Paren", ')': "Close_Paren"}
+        self._errors = {"Invalid_Chars_Error": "Invalid Chars found: ", "Invalid_Char_Error": "Invalid Char found: ",
+                        "Number_Error": "Invalid Number Format: ",
+                        "Empty_Input_Error": "Invalid Input, The input must contain an expression"}
+        self._error_handler = error_handler
 
-    def tokenize_expression(self):
+    def tokenize_expression(self, exp):
         """
         :return: This func will add tokens to the token list of the tokenizer
         """
         # remove all white spaces and turn the expression into a list
-        cleaned_exp = ''.join(self._exp.split())
+        cleaned_exp = ''.join(exp.split())
         # check for an empty expression
         if cleaned_exp:
             current_token = ""
@@ -48,7 +57,7 @@ class Tokenizer:
                         last_token_type = "Number"
                     else:
                         # invalid token type
-                        last_token_type = "Error"
+                        last_token_type = "Number_Error"
                 # check if the char is an operator (not including minus)
                 elif char in "+*/^%$@!~":
                     last_token_type = self._operators[char]
@@ -57,7 +66,8 @@ class Tokenizer:
                 elif char == '-':
                     current_token = char
                     # check for unary minus
-                    if last_token_type == "" or (last_token_type != "Close_Paren" and last_token_type != "Number"):
+                    if last_token_type == "" or (
+                            last_token_type != "Close_Paren" and last_token_type != "Number" and last_token_type != "Factorial"):
                         last_token_type = "Unary_Minus"
                     else:
                         last_token_type = "Minus"
@@ -67,10 +77,11 @@ class Tokenizer:
                     last_token_type = self._paren[char]
                 else:
                     # error because the char is not a valid token
-                    last_token_type = "Error"
+                    last_token_type = "Invalid_Char_Error"
                     current_token += char
                     cur_pos += 1
                     while cur_pos < len(cleaned_exp) and cleaned_exp[cur_pos] not in self._valid_tokens:
+                        last_token_type = "Invalid_Chars_Error"
                         current_token += cleaned_exp[cur_pos]
                         cur_pos += 1
                     cur_pos -= 1
@@ -78,18 +89,34 @@ class Tokenizer:
                 ending_index = cur_pos
                 # add the token
                 self._token_list.append(
-                    Token(last_token_type, current_token, self._operator_precedence_table[last_token_type], starting_index,
+                    Token(last_token_type, current_token, self._operator_precedence_table[last_token_type],
+                          starting_index,
                           ending_index)
                 )
-                cur_pos += 1
+                # check if I need to add an error
+                if last_token_type in self._errors.keys():
+                    self._error_handler.add_error(
+                        LexicalError(self._errors[last_token_type] + current_token, (starting_index, ending_index)))
+                # reset
                 current_token = ""
+                cur_pos += 1
         else:
-            self._token_list.append(
-                Token("Error", "-1", self._operator_precedence_table["Error"], -1,
-                      -1)
-            )
+            # add an empty input error
+            self._error_handler.add_error(LexicalError(self._errors["Empty_Input_Error"], (-1, -1)))
 
-    def get_number_token(self, cleaned_exp : str, starting_index: int, current_token: str):
+        # now finished lexing check if the first or last tokens are valid ops
+        valid_start, valid_end = self.check_start_and_end()
+
+        if valid_start:
+            self._error_handler.add_error(LexicalError(f"Invalid starting operator: "
+                                                       f"{self._token_list[0].get_value()}",
+                                                       self._token_list[0].get_pos()))
+        if valid_end:
+            self._error_handler.add_error(LexicalError(f"Invalid ending operator: "
+                                                       f"{self._token_list[-1].get_value()}",
+                                                       self._token_list[-1].get_pos()))
+
+    def get_number_token(self, cleaned_exp: str, starting_index: int, current_token: str):
         """
         :param cleaned_exp:
         :param starting_index:
@@ -113,8 +140,20 @@ class Tokenizer:
             return True
         return False
 
+    def check_start_and_end(self):
+        valid_start = True
+        valid_end = True
+        if self._token_list[0].get_value() not in "-~" and self._token_list[0].get_value() in "+*/^&%$@!":
+            valid_start = False
+        if self._token_list[-1].get_value() != "!" and self._token_list[-1].get_value() in "+*/^&%$@!-~":
+            valid_end = False
+        return valid_start, valid_end
+
     def get_tokens(self):
         return self._token_list
+
+    def clear_tokens(self):
+        self._token_list = []
 
 
 class Token:
@@ -122,7 +161,8 @@ class Token:
     This class is used to hold information about the different tokens
     """
 
-    def __init__(self, token_type : str, token_value: str, token_precedence: int, starting_index : int, ending_index : int):
+    def __init__(self, token_type: str, token_value: str, token_precedence: int, starting_index: int,
+                 ending_index: int):
         self._token_type = token_type
         self._token_value = token_value
         self._precedence = token_precedence
@@ -133,13 +173,14 @@ class Token:
         return f"Token_type: {self._token_type} , Token_value: {self._token_value} , Token_precedence: {self._precedence} ," \
                f" Token starts at: {self._starting_index} and ends at: {self._ending_index}"
 
+    def get_type(self):
+        return self._token_type
 
-def main():
-    tokens = Tokenizer(input_expression=input("Enter an expression: "))
-    tokens.tokenize_expression()
-    for token in tokens.get_tokens():
-        print(token)
+    def get_value(self):
+        return self._token_value
 
+    def get_precedence(self):
+        return self._precedence
 
-if __name__ == '__main__':
-    main()
+    def get_pos(self):
+        return self._starting_index, self._ending_index
