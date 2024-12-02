@@ -9,9 +9,13 @@ class Operator(ABC):
     Abstract operator data class for all the same funcs in all the operators
     """
     precedence: int
+    value: str
 
     def get_precedence(self) -> int:
         return self.precedence
+
+    def get_op_value(self) -> str:
+        return self.value
 
 
 class IBinaryOperator(ABC):
@@ -47,6 +51,7 @@ class Minus(IBinaryOperator, Operator):
     """
     Class for the - op
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         return num1 - num2
 
@@ -55,6 +60,7 @@ class Multiplication(IBinaryOperator, Operator):
     """
     Class for the * op
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         return num1 * num2
 
@@ -72,6 +78,7 @@ class Power(IBinaryOperator, Operator):
     """
     Class for the ^ op
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         return pow(num1, num2)
 
@@ -80,6 +87,7 @@ class Max(IBinaryOperator, Operator):
     """
     Class for the $ op
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         return num1 if num1 > num2 else num2
 
@@ -88,6 +96,7 @@ class Min(IBinaryOperator, Operator):
     """
     Class for the & class
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         return num1 if num1 < num2 else num2
 
@@ -96,6 +105,7 @@ class Modulo(IBinaryOperator, Operator):
     """
     Class for the % op
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         return num1 % num2
 
@@ -113,6 +123,7 @@ class UMinus(IUnaryOperator, Operator):
     """
     Class for the unary minus
     """
+
     def unary_evaluate(self, num1: float) -> float:
         return num1 * -1
 
@@ -123,7 +134,10 @@ class Factorial(IUnaryOperator, Operator):
     """
 
     def unary_evaluate(self, num1: float) -> float:
-        pass
+        factorial = 1
+        for i in range(1, num1 + 1):
+            factorial = factorial * i
+        return factorial
 
 
 class Negative(IUnaryOperator, Operator):
@@ -137,20 +151,27 @@ class Negative(IUnaryOperator, Operator):
 
 class OpData:
     """
-    Class to handle the operator data
+    Static Class to handle the operator data
     """
-    def __init__(self):
-        self.__operatorData = {
-            '+': Plus(1),
-            '-': Minus(1),
-            '*': Multiplication(2),
-            '/': Division(2),
-            '&': Min(6),
-            '^': Power(3),
-            '%': Modulo(5),
-            '$': Max(6),
-            '@': Avg(6),
-            '!': Factorial(7),
-            '~': Negative(7),
-            'U-': UMinus(4)
-        }
+    operatorData = {
+            '+': Plus(1, '+'),
+            '-': Minus(1, '-'),
+            '*': Multiplication(2, '*'),
+            '/': Division(2, '/'),
+            '&': Min(6, '&'),
+            '^': Power(3, '^'),
+            '%': Modulo(5, '%'),
+            '$': Max(6, '$'),
+            '@': Avg(6, '@'),
+            '!': Factorial(7, '!'),
+            '~': Negative(7, '~'),
+            'U-': UMinus(4, 'U-')
+    }
+
+    @classmethod
+    def get_op_keys(cls):
+        return cls.operatorData.keys()
+
+    @classmethod
+    def get_op_class(cls, op_key):
+        return cls.operatorData[op_key]
