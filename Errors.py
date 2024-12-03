@@ -18,12 +18,12 @@ class LexicalError(BaseCalcError):
         self._error_pos = position
 
     def __str__(self):
+        # check if the error msg is of invalid input
+        if self._error_pos[0] == -1:
+            return f"Lexical Error: {self._error_msg}"
         # check if the error msg is of a single char
         if self._error_pos[0] == self._error_pos[1]:
             return f"Lexical Error: {self._error_msg} at position: {self._error_pos[0]}"
-        # check if the error msg is of invalid input
-        elif self._error_pos[0] == -1:
-            return f"Lexical Error: {self._error_msg}"
         # the rest of the error msgs
         return f"Lexical Error: {self._error_msg} at position: {self._error_pos[0]} -> {self._error_pos[1]}"
 

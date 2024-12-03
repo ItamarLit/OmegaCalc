@@ -1,49 +1,56 @@
 from ErrorHandler import ErrorHandler
 from Tokenizer import Token
-from Operators import Operator
+from Operators import Operator, IUnaryOperator
+from Errors import ConversionError
+
 
 class Converter:
     """
     Class that converts an infix token list into a postfix token list
     The possible errors to get while converting are:
-    1.
-    2.
+    1. Invalid paren ie missing ( to a ) token or missing ) to a (
+    2. Invalid use of the ~ op ie it is not in front of a binary minus or a number
     """
 
     def __init__(self, error_handler: ErrorHandler):
         self._error_handler = error_handler
         self._output_lst = []
         self._op_stack = []
-        # dict to hold the handlers
-        self.handlers = {
-            0: self.__handle_number,
-            1: self.__handle_paren,
-            2: self.__handle_operator,
-        }
 
     def convert(self, token_list):
         # convert infix token list to post fix
+        cur_index = 0
         for token in token_list:
-            # go over the handler dict and get the correct handler
-            handle_func = self.handlers[self.__get_handler_key(token)]
-            # call the handle func
-            handle_func(token)
+            if token.get_token_type() == "Number":
+                self._handle_number(token)
+            elif isinstance(token.get_token_value(), Operator):
+                self._handle_operator(token)
+                # check if we are on a tilda and if it is valid
+                if token.get_token_type() == '~' and not self._check_tilda_op(cur_index, token_list):
+                    self._error_handler.add_error(
+                        ConversionError("Invalid use of ~ op at pos: " + str(token.get_token_pos()[0])))
+            else:
+                # the token is paren
+                self._handle_paren(token)
+            cur_index += 1
         # call the end of input func
-        self.__handle_end_input()
+        self._handle_end_input()
 
-    def __get_handler_key(self, token):
+
+
+    def _check_tilda_op(self, cur_index, token_list):
         """
-        This func maps the token type to the handler dict key
-        :param token:
+        Func that checks if the tilda is recieved in a valid way
+        :param cur_index:
+        :param token_list:
         :return:
         """
-        if token.get_token_type() == "Number":
-            return 0
-        elif isinstance(token.get_token_value(), Operator):
-            return 2
-        return 1
+        # the tilda op can only come before a unary minus or a number
+        if token_list[cur_index + 1].get_token_type() != "Number" or token_list[cur_index + 1].get_token_type() != 'U-':
+            return False
+        return True
 
-    def __handle_number(self, token):
+    def _handle_number(self, token):
         """
         Adds a number literal to the output list
         :param token:
@@ -51,30 +58,67 @@ class Converter:
         """
         self._output_lst.append(float(token.get_token_value()))
 
-    def __handle_paren(self, token):
+    def _handle_paren(self, token):
         """
         Handles the paren
         :param token:
         :return:
         """
         if token.get_token_value() == '(':
-            self._op_stack.append(token.get_token_value())
+            self._op_stack.append(token)
         else:
             # paren is )
-            while len(self._op_stack) != 0 and self._op_stack[-1] != '(':
-                self._output_lst.append(self._op_stack.pop().get_op_value())
-            # pop the final paren
-            self._op_stack.pop()
+            if self._check_list_for_paren('('):
+                while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(':
+                    self._output_lst.append(self._op_stack.pop().get_token_value().get_op_value())
+                # pop the final paren
+                self._op_stack.pop()
+            else:
+                self._error_handler.add_error(
+                    ConversionError("Missing Opening parentheses to opening parentheses at position: " + str(token.get_token_pos()[0])))
 
-    def __handle_operator(self, token):
-        while len(self._op_stack) != 0 and self._op_stack[-1] != '(' and \
-                self.check_precedence(token.get_token_value(), self._op_stack[-1]) <= 0 and len(self._output_lst) != 0:
-            self._output_lst.append(self._op_stack.pop().get_op_value())
-        self._op_stack.append(token.get_token_value())
+    def _check_list_for_paren(self, paren_type: chr) -> bool:
+        """
+        Func to check if the op_stack has an opening paren
+        :return:
+        """
+        for token in self._op_stack:
+            if token.get_token_type() == paren_type:
+                return True
+        return False
 
-    def __handle_end_input(self):
-        while len(self._op_stack) != 0:
-            self._output_lst.append(self._op_stack.pop().get_op_value())
+    def _handle_operator(self, token):
+        """
+        Func that will handle operator adding to the output list
+        :param token:
+        :return:
+        """
+        current_op = token.get_token_value()
+        # check if the token is unary
+        if isinstance(current_op, IUnaryOperator):
+            self._op_stack.append(token)
+        else:
+            # binary op
+            while len(self._op_stack) != 0 and self._op_stack[-1] != '(' and \
+                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(self._output_lst) != 0:
+                self._output_lst.append(self._op_stack.pop().get_token_value().get_op_value())
+            self._op_stack.append(token)
+
+    def _handle_end_input(self):
+        """
+        Func that will add the final ops to the output list
+        :return:
+        """
+        if self._check_list_for_paren('('):
+            # invalid exp missing ) to opening paren, get the indexes
+            invalid_indexes = list(filter(lambda pos: self._op_stack[pos].get_token_value() == '(', range(len(self._op_stack))))
+            for index in invalid_indexes:
+                # add the error
+                self._error_handler.add_error(
+                    ConversionError("Missing Closing parentheses to opening parentheses at position: " + str(self._op_stack[index].get_token_pos()[0])))
+        else:
+            while len(self._op_stack) != 0:
+                self._output_lst.append(self._op_stack.pop().get_token_value().get_op_value())
 
     def check_precedence(self, op_token1: Token, op_token2: Token) -> int:
         """
@@ -88,9 +132,16 @@ class Converter:
         """
         return op_token1.get_precedence() - op_token2.get_precedence()
 
-    def get_rpn(self):
+    def get_post_fix(self):
+        """
+        :return: return the postfix list
+        """
         return self._output_lst
 
     def clear_converter(self):
+        """
+        Clear the used values
+        :return:
+        """
         self._op_stack = []
         self._output_lst = []

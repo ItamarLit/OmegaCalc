@@ -18,6 +18,7 @@ class Operator(ABC):
         return self.value
 
 
+
 class IBinaryOperator(ABC):
     """
     Binary operator interface

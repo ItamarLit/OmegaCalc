@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Errors import *
+from Errors import LexicalError
 from Operators import OpData
 
 
@@ -179,3 +179,6 @@ class Token:
 
     def get_token_type(self):
         return self._token_type
+
+    def get_token_pos(self):
+        return self._starting_index, self._ending_index
