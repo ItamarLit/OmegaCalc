@@ -21,7 +21,6 @@ class Tokenizer:
         # pattern for all valid numbers
         self._number_pattern = "1234567890."
         # dict to hold operator and token type values except for minus
-        self._paren = {'(': "Open_Paren", ')': "Close_Paren"}
         self._errors = {"Invalid_Chars_Error": "Invalid Chars found: ", "Invalid_Char_Error": "Invalid Char found: ",
                         "Number_Error": "Invalid Number Format: ",
                         "Empty_Input_Error": "Invalid Input, The input must contain an expression",
@@ -61,9 +60,9 @@ class Tokenizer:
                         current_token_type = char
                     current_token_value = OpData.get_op_class(current_token_value)
                 # check paren
-                elif char in self._paren.keys():
+                elif char in "()":
                     current_token_value = char
-                    current_token_type = self._paren[char]
+                    current_token_type = char
                 else:
                     # error because the char is not a valid token
                     current_token_value, current_token_type, cur_pos = self.handle_invalid_char_error(cleaned_exp, cur_pos)
@@ -120,7 +119,7 @@ class Tokenizer:
         """
         if len(self._token_list) == 0 or (
                 self._token_list[-1].get_token_type() not in ["Number", "Open_Paren"] and
-                not isinstance(self._token_list[-1].get_token_value(), OpData.get_op_class('!'))
+                not isinstance(self._token_list[-1].get_token_value(), type(OpData.get_op_class('!')))
         ):
             return "U-"
         else:
