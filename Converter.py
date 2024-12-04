@@ -10,6 +10,8 @@ class Converter:
     The possible errors to get while converting are:
     1. Invalid paren ie missing ( to a ) token or missing ) to a (
     2. Invalid use of the ~ op ie it is not in front of a binary minus or a number
+
+    The output list will be a list of tokens in postfix so that i can give better errors in the evaluator (get the position of the error)
     """
 
     def __init__(self, error_handler: ErrorHandler):
@@ -56,7 +58,7 @@ class Converter:
         :param token:
         :return:
         """
-        self._output_lst.append(float(token.get_token_value()))
+        self._output_lst.append(token)
 
     def _handle_paren(self, token):
         """
@@ -70,7 +72,7 @@ class Converter:
             # paren is )
             if self._check_list_for_paren('('):
                 while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(':
-                    self._output_lst.append(self._op_stack.pop().get_token_value().get_op_value())
+                    self._output_lst.append(self._op_stack.pop())
                 # pop the final paren
                 self._op_stack.pop()
             else:
@@ -99,9 +101,9 @@ class Converter:
             self._op_stack.append(token)
         else:
             # binary op
-            while len(self._op_stack) != 0 and self._op_stack[-1] != '(' and \
+            while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
                     self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(self._output_lst) != 0:
-                self._output_lst.append(self._op_stack.pop().get_token_value().get_op_value())
+                self._output_lst.append(self._op_stack.pop())
             self._op_stack.append(token)
 
     def _handle_end_input(self):
@@ -118,7 +120,7 @@ class Converter:
                     ConversionError("Missing Closing parentheses to opening parentheses at position: " + str(self._op_stack[index].get_token_pos()[0])))
         else:
             while len(self._op_stack) != 0:
-                self._output_lst.append(self._op_stack.pop().get_token_value().get_op_value())
+                self._output_lst.append(self._op_stack.pop())
 
     def check_precedence(self, op_token1: Token, op_token2: Token) -> int:
         """

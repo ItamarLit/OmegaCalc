@@ -136,7 +136,7 @@ class Factorial(IUnaryOperator, Operator):
 
     def unary_evaluate(self, num1: float) -> float:
         factorial = 1
-        for i in range(1, num1 + 1):
+        for i in range(1, int(num1 + 1)):
             factorial = factorial * i
         return factorial
 
