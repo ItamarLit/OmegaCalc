@@ -65,14 +65,16 @@ class Tokenizer:
                     current_token_type = char
                 else:
                     # error because the char is not a valid token
-                    current_token_value, current_token_type, cur_pos = self.handle_invalid_char_error(cleaned_exp, cur_pos)
+                    current_token_value, current_token_type, cur_pos = self.handle_invalid_char_error(cleaned_exp,
+                                                                                                      cur_pos)
                 ending_index = cur_pos
                 # add the token to the list
                 self._token_list.append(Token(current_token_type, current_token_value, starting_index, ending_index))
                 # check if I need to add an error
                 if current_token_type in self._errors.keys():
                     self._error_handler.add_error(
-                        LexicalError(self._errors[current_token_type] + current_token_value, (starting_index, ending_index)))
+                        LexicalError(self._errors[current_token_type] + current_token_value,
+                                     (starting_index, ending_index)))
                 # reset
                 current_token_value = ""
                 current_token_type = ""
@@ -140,8 +142,7 @@ class Tokenizer:
             current_token_type = "Invalid_Chars_Error"
             current_token += cleaned_exp[cur_pos]
             cur_pos += 1
-
-        cur_pos -= 1  # Adjust to point to the last invalid character
+        cur_pos -= 1
         return current_token, current_token_type, cur_pos
 
     def handle_invalid_operators(self):
@@ -153,11 +154,13 @@ class Tokenizer:
             # check first token
             if self._token_list[0].get_token_type() in self._invalid_start_pattern:
                 self._error_handler.add_error(
-                    LexicalError(self._errors["Invalid_Start"] + self._token_list[0].get_token_value().get_op_value(), (-1, 0)))
+                    LexicalError(self._errors["Invalid_Start"] + self._token_list[0].get_token_value().get_op_value(),
+                                 (-1, 0)))
             # check last token
             if self._token_list[-1].get_token_type() in self._invalid_end_pattern:
                 self._error_handler.add_error(
-                    LexicalError(self._errors["Invalid_End"] + self._token_list[-1].get_token_value().get_op_value(), (-1, 0)))
+                    LexicalError(self._errors["Invalid_End"] + self._token_list[-1].get_token_value().get_op_value(),
+                                 (-1, 0)))
 
 
 class Token:

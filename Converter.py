@@ -1,6 +1,6 @@
 from ErrorHandler import ErrorHandler
 from Tokenizer import Token
-from Operators import Operator, IUnaryOperator
+from Operators import Operator, IUnaryOperator, UMinus
 from Errors import ConversionError
 
 
@@ -10,7 +10,7 @@ class Converter:
     The possible errors to get while converting are:
     1. Invalid paren ie missing ( to a ) token or missing ) to a (
     2. Invalid use of the ~ op ie it is not in front of a binary minus or a number
-
+    3. Invalid unary minus use, ie it isnt before (, a number or another unary minus to the right
     The output list will be a list of tokens in postfix so that i can give better errors in the evaluator (get the position of the error)
     """
 
@@ -26,7 +26,7 @@ class Converter:
             if token.get_token_type() == "Number":
                 self._handle_number(token)
             elif isinstance(token.get_token_value(), Operator):
-                self._handle_operator(token)
+                self._handle_operator(token, cur_index, token_list)
                 # check if we are on a tilda and if it is valid
                 if token.get_token_type() == '~' and not self._check_tilda_op(cur_index, token_list):
                     self._error_handler.add_error(
@@ -39,7 +39,6 @@ class Converter:
         self._handle_end_input()
 
 
-
     def _check_tilda_op(self, cur_index, token_list):
         """
         Func that checks if the tilda is recieved in a valid way
@@ -48,7 +47,7 @@ class Converter:
         :return:
         """
         # the tilda op can only come before a unary minus or a number
-        if token_list[cur_index + 1].get_token_type() != "Number" or token_list[cur_index + 1].get_token_type() != 'U-':
+        if token_list[cur_index + 1].get_token_type() != "Number" and not isinstance(token_list[cur_index + 1].get_token_value(), UMinus):
             return False
         return True
 
@@ -89,7 +88,7 @@ class Converter:
                 return True
         return False
 
-    def _handle_operator(self, token):
+    def _handle_operator(self, token, cur_index, token_list):
         """
         Func that will handle operator adding to the output list
         :param token:
@@ -98,6 +97,7 @@ class Converter:
         current_op = token.get_token_value()
         # check if the token is unary
         if isinstance(current_op, IUnaryOperator):
+            self._check_unary_minus(cur_index, token_list)
             self._op_stack.append(token)
         else:
             # binary op
@@ -105,6 +105,22 @@ class Converter:
                     self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(self._output_lst) != 0:
                 self._output_lst.append(self._op_stack.pop())
             self._op_stack.append(token)
+
+    def _check_unary_minus(self, cur_index, token_list):
+        """
+        Func that checks that a unary minus is in a correct place
+        :param cur_index:
+        :return:
+        """
+        if token_list[cur_index].get_token_type() == "U-":
+            next_token = token_list[cur_index + 1]
+
+            if next_token.get_token_type() != "Number" and next_token.get_token_type() != ")" and next_token.get_token_type() != "U-":
+                # add the error to the error handler
+                self._error_handler.add_error(ConversionError(f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
+                                                              f" cannot come before: {next_token.get_token_type()}"))
+
+
 
     def _handle_end_input(self):
         """

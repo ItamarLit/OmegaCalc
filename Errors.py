@@ -49,3 +49,11 @@ class EvaluationError(BaseCalcError):
     def __str__(self):
         return f"Evaluation Error: {self._error_msg}"
 
+
+class NegativeFactorialError(Exception):
+    """
+    Class for the negative factorial attempt error
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)

@@ -32,10 +32,14 @@ def run_calc(input_exp, tokenizer, converter,evaluator, error_handler):
     if error_handler.has_errors():
         error_handler.show_errors()
         return
+    #for token in tokenizer.get_tokens():
+    #    print(token)
     converter.convert(tokenizer.get_tokens())
     if error_handler.has_errors():
         error_handler.show_errors()
         return
+    for token in converter.get_post_fix():
+        print(token)
     evaluator.eval(converter.get_post_fix())
     if error_handler.has_errors():
         error_handler.show_errors()

@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Errors import EvaluationError
+from Errors import EvaluationError, NegativeFactorialError
 from Tokenizer import Token
 from Operators import IUnaryOperator
 
@@ -9,6 +9,8 @@ class Evaluator:
     This class will evaluate the given postfix expression, it will catch the following errors:
     1. missing operands for binary and unary ops
     2. invalid double operands
+    3. invalid division attempt (by 0)
+    4. invalid attempt to use ! on a negative number
     """
 
     def __init__(self, error_handler: ErrorHandler):
@@ -39,7 +41,13 @@ class Evaluator:
             # unary op
             if len(self._calculation_stack) > 0:
                 # eval the unary op and push it back to the stack
-                self._calculation_stack.append(token_class.unary_evaluate(self._calculation_stack.pop()))
+                num_val = self._calculation_stack.pop()
+                try:
+                    self._calculation_stack.append(token_class.unary_evaluate(num_val))
+                except NegativeFactorialError:
+                    self._error_handler.add_error(EvaluationError(
+                        f"Cannot perform factorial at position: {token.get_token_pos()[0]} on a negative number: {num_val}"))
+
             else:
                 # error missing operand for a unary token
                 self._error_handler.add_error(EvaluationError(f"Missing operand for unary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
@@ -49,7 +57,10 @@ class Evaluator:
                 second_operand = self._calculation_stack.pop()
                 first_operand = self._calculation_stack.pop()
                 # eval the binary op and push it back
-                self._calculation_stack.append(token_class.binary_evaluate(first_operand, second_operand))
+                try:
+                    self._calculation_stack.append(token_class.binary_evaluate(first_operand, second_operand))
+                except ZeroDivisionError:
+                    self._error_handler.add_error(EvaluationError(f"Cannot divide value by 0"))
             else:
                 # error missing operand for binary op
                 if len(self._calculation_stack) == 0:
