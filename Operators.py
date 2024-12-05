@@ -9,14 +9,18 @@ class Operator(ABC):
     """
     Abstract operator data class for all the same funcs in all the operators
     """
-    precedence: int
-    value: str
+    _precedence: int
+    _value: str
+    _description: str
 
     def get_precedence(self) -> int:
-        return self.precedence
+        return self._precedence
 
     def get_op_value(self) -> str:
-        return self.value
+        return self._value
+
+    def get_description(self) -> str:
+        return self._description
 
 
 class IBinaryOperator(ABC):
@@ -153,29 +157,33 @@ class Negative(IUnaryOperator, Operator):
         return num1 * -1
 
 
-class OpData:
+class OpData(ABC):
     """
     Static Class to handle the operator data
     """
     operatorData = {
-        '+': Plus(1, '+'),
-        '-': Minus(1, '-'),
-        '*': Multiplication(2, '*'),
-        '/': Division(2, '/'),
-        '&': Min(6, '&'),
-        '^': Power(3, '^'),
-        '%': Modulo(5, '%'),
-        '$': Max(6, '$'),
-        '@': Avg(6, '@'),
-        '!': Factorial(7, '!'),
-        '~': Negative(7, '~'),
-        'U-': UMinus(4, 'U-')
+        '+': Plus(1, '+', "This operator adds two operands"),
+        '-': Minus(1, '-', "This operator subtracts two operands"),
+        '*': Multiplication(2, '*', "This operator multiplies two operands"),
+        '/': Division(2, '/', "This operator divides two operands"),
+        '&': Min(6, '&', "This operator gives the minimum between two operands"),
+        '^': Power(3, '^', "This operator is the power operator"),
+        '%': Modulo(5, '%', "This operator is the modulo operator"),
+        '$': Max(6, '$', "This operator gives the maximum between two operands"),
+        '@': Avg(6, '@', "This operator gives the average between two operands"),
+        '!': Factorial(7, '!', "This operator returns the factorial of a a single un-negative operand"),
+        '~': Negative(7, '~', "This is the negative operator"),
+        'U-': UMinus(4, 'U-', "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
     }
 
-    @classmethod
-    def get_op_keys(cls):
-        return cls.operatorData.keys()
+    @staticmethod
+    def get_op_keys():
+        return OpData.operatorData.keys()
 
-    @classmethod
-    def get_op_class(cls, op_key):
-        return cls.operatorData[op_key]
+    @staticmethod
+    def get_op_classes():
+        return OpData.operatorData.items()
+
+    @staticmethod
+    def get_op_class(op_key):
+        return OpData.operatorData[op_key]
