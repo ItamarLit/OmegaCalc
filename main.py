@@ -23,6 +23,7 @@ def main():
 def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
     """
     Main calc func to preform all the func on the inputed expression and print the output
+    :param evaluator:
     :param input_exp:
     :param tokenizer:
     :param converter:
@@ -31,8 +32,6 @@ def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
     """
     try:
         tokenizer.tokenize_expression(input_exp)
-        for token in tokenizer.get_tokens():
-            print(token)
         converter.convert(tokenizer.get_tokens())
         evaluator.eval(converter.get_post_fix())
         print(evaluator.get_final())
@@ -47,6 +46,7 @@ def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
 def clear_values(tokenizer, converter, evaluator, error_handler):
     """
     Func to clear all the old values in the calculator parts
+    :param evaluator:
     :param tokenizer:
     :param converter:
     :param error_handler:

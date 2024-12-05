@@ -1,6 +1,5 @@
 from ErrorHandler import ErrorHandler
 from Errors import EvaluationError, NegativeFactorialError
-from Tokenizer import Token
 from Operators import IUnaryOperator
 
 

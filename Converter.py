@@ -1,5 +1,4 @@
 from ErrorHandler import ErrorHandler
-from Tokenizer import Token
 from Operators import Operator, IUnaryOperator, UMinus
 from Errors import ConversionError
 
@@ -10,8 +9,8 @@ class Converter:
     The possible errors to get while converting are:
     1. Invalid paren ie missing ( to a ) token or missing ) to a (
     2. Invalid use of the ~ op ie it is not in front of a binary minus or a number
-    3. Invalid unary minus use, ie it isnt before (, a number or another unary minus to the right
-    The output list will be a list of tokens in postfix so that i can give better errors in the evaluator (get the position of the error)
+    3. Invalid unary minus use, ie it isn't before (, a number or another unary minus to the right
+    The output list will be a list of tokens in postfix so that I can give better errors in the evaluator (get the position of the error)
     """
 
     def __init__(self, error_handler: ErrorHandler):
@@ -40,10 +39,9 @@ class Converter:
         # check if we need to show errors
         self._error_handler.check_errors()
 
-
     def _check_tilda_op(self, cur_index, token_list):
         """
-        Func that checks if the tilda is recieved in a valid way
+        Func that checks if the tilda is received in a valid way
         :param cur_index:
         :param token_list:
         :return:
@@ -117,11 +115,10 @@ class Converter:
         if token_list[cur_index].get_token_type() == "U-":
             next_token = token_list[cur_index + 1]
 
-            if next_token.get_token_type() != "Number" and next_token.get_token_type() != ")" and next_token.get_token_type() != "U-":
+            if next_token.get_token_type() != "Number" and next_token.get_token_type() != "(" and next_token.get_token_type() != "U-":
                 # add the error to the error handler
                 self._error_handler.add_error(ConversionError(f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
                                                               f" cannot come before: {next_token.get_token_type()}"))
-
 
     def _handle_end_input(self):
         """
@@ -139,7 +136,7 @@ class Converter:
             while len(self._op_stack) != 0:
                 self._output_lst.append(self._op_stack.pop())
 
-    def check_precedence(self, op_token1: Token, op_token2: Token) -> int:
+    def check_precedence(self, op_token1: Operator, op_token2: Operator) -> int:
         """
         This func will return:
         neg num if op1 < op2
