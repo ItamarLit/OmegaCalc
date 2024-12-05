@@ -149,7 +149,7 @@ class Tokenizer:
         :return: check if the minus is unary or binary
         """
         if len(self._token_list) == 0 or (
-                self._token_list[-1].get_token_type() not in ["Number", "Open_Paren"] and
+                self._token_list[-1].get_token_type() not in ["Number", ")"] and
                 not isinstance(self._token_list[-1].get_token_value(), type(OpData.get_op_class('!')))
         ):
             return "U-"
