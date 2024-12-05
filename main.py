@@ -2,6 +2,7 @@ from Converter import Converter
 from ErrorHandler import ErrorHandler
 from Tokenizer import Tokenizer
 from Evaluator import Evaluator
+from OutputHandler import OutputHandler
 
 
 def main():
@@ -10,14 +11,17 @@ def main():
     converter = Converter(error_handler)
     evaluator = Evaluator(error_handler)
     # print the instructions
-    print("Welcome to the Omega>Sigit Calc please enter an expression")
+    OutputHandler.output_main_instructions()
     while True:
         input_exp = input("Enter an expression: ")
         if input_exp.lower() == "exit":
-            print("Goodbye!")
+            print("GoodBye remember: Omega>Sigit")
             break
-        run_calc(input_exp, tokenizer, converter, evaluator, error_handler)
-        clear_values(tokenizer, converter, evaluator, error_handler)
+        elif input_exp.lower() == "op":
+            OutputHandler.output_op_data()
+        else:
+            run_calc(input_exp, tokenizer, converter, evaluator, error_handler)
+            clear_values(tokenizer, converter, evaluator, error_handler)
 
 
 def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
@@ -34,13 +38,13 @@ def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
         tokenizer.tokenize_expression(input_exp)
         converter.convert(tokenizer.get_tokens())
         evaluator.eval(converter.get_post_fix())
-        print(evaluator.get_final())
+        OutputHandler.output_data(evaluator.get_final())
     except StopIteration:
         # if we get a stopIteration then we had an error
         error_handler.show_errors()
     except Exception as e:
         # added an exception catch, this shouldn't happen
-        print(e)
+        pass
 
 
 def clear_values(tokenizer, converter, evaluator, error_handler):

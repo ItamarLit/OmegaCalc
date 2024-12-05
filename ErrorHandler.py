@@ -1,6 +1,5 @@
 from Errors import BaseCalcError
-
-
+from OutputHandler import OutputHandler
 class ErrorHandler:
     def __init__(self):
         self._errorList = []
@@ -25,7 +24,7 @@ class ErrorHandler:
         :return: Prints all the errors to the CLI
         """
         for error in self._errorList:
-            print(error)
+            OutputHandler.output_error(error)
 
     def clear_errors(self):
         """
