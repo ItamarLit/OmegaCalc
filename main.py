@@ -3,6 +3,7 @@ from ErrorHandler import ErrorHandler
 from Tokenizer import Tokenizer
 from Evaluator import Evaluator
 
+
 def main():
     error_handler = ErrorHandler()
     tokenizer = Tokenizer(error_handler)
@@ -19,7 +20,7 @@ def main():
         clear_values(tokenizer, converter, evaluator, error_handler)
 
 
-def run_calc(input_exp, tokenizer, converter,evaluator, error_handler):
+def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
     """
     Main calc func to preform all the func on the inputed expression and print the output
     :param input_exp:
@@ -28,24 +29,19 @@ def run_calc(input_exp, tokenizer, converter,evaluator, error_handler):
     :param error_handler:
     :return:
     """
-    tokenizer.tokenize_expression(input_exp)
-    if error_handler.has_errors():
-        error_handler.show_errors()
-        return
-    #for token in tokenizer.get_tokens():
-    #    print(token)
-    converter.convert(tokenizer.get_tokens())
-    if error_handler.has_errors():
-        error_handler.show_errors()
-        return
-    for token in converter.get_post_fix():
-        print(token)
-    evaluator.eval(converter.get_post_fix())
-    if error_handler.has_errors():
-        error_handler.show_errors()
-        return
-    else:
+    try:
+        tokenizer.tokenize_expression(input_exp)
+        for token in tokenizer.get_tokens():
+            print(token)
+        converter.convert(tokenizer.get_tokens())
+        evaluator.eval(converter.get_post_fix())
         print(evaluator.get_final())
+    except StopIteration:
+        # if we get a stopIteration then we had an error
+        error_handler.show_errors()
+    except Exception as e:
+        # added an exception catch, this shouldn't happen
+        print(e)
 
 
 def clear_values(tokenizer, converter, evaluator, error_handler):
@@ -60,6 +56,7 @@ def clear_values(tokenizer, converter, evaluator, error_handler):
     error_handler.clear_errors()
     converter.clear_converter()
     evaluator.clear_evaluator()
+
 
 if __name__ == '__main__':
     main()

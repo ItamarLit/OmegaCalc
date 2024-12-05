@@ -24,6 +24,8 @@ class Evaluator:
             else:
                 # op token
                 self.handle_operator_token(token)
+        # check if we need to show errors
+        self._error_handler.check_errors()
 
     def get_final(self):
         # get the final evaled num

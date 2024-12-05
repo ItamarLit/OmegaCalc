@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from math import pow
 from Errors import NegativeFactorialError
 
+
 @dataclass
 class Operator(ABC):
     """
@@ -16,7 +17,6 @@ class Operator(ABC):
 
     def get_op_value(self) -> str:
         return self.value
-
 
 
 class IBinaryOperator(ABC):
@@ -158,18 +158,18 @@ class OpData:
     Static Class to handle the operator data
     """
     operatorData = {
-            '+': Plus(1, '+'),
-            '-': Minus(1, '-'),
-            '*': Multiplication(2, '*'),
-            '/': Division(2, '/'),
-            '&': Min(6, '&'),
-            '^': Power(3, '^'),
-            '%': Modulo(5, '%'),
-            '$': Max(6, '$'),
-            '@': Avg(6, '@'),
-            '!': Factorial(7, '!'),
-            '~': Negative(7, '~'),
-            'U-': UMinus(4, 'U-')
+        '+': Plus(1, '+'),
+        '-': Minus(1, '-'),
+        '*': Multiplication(2, '*'),
+        '/': Division(2, '/'),
+        '&': Min(6, '&'),
+        '^': Power(3, '^'),
+        '%': Modulo(5, '%'),
+        '$': Max(6, '$'),
+        '@': Avg(6, '@'),
+        '!': Factorial(7, '!'),
+        '~': Negative(7, '~'),
+        'U-': UMinus(4, 'U-')
     }
 
     @classmethod

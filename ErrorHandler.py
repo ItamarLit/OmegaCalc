@@ -33,3 +33,7 @@ class ErrorHandler:
         :return: Removes all the errors from the error list
         """
         self._errorList = []
+
+    def check_errors(self):
+        if self.has_errors():
+            raise StopIteration

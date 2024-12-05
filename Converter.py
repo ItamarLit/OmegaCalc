@@ -37,6 +37,8 @@ class Converter:
             cur_index += 1
         # call the end of input func
         self._handle_end_input()
+        # check if we need to show errors
+        self._error_handler.check_errors()
 
 
     def _check_tilda_op(self, cur_index, token_list):
@@ -119,7 +121,6 @@ class Converter:
                 # add the error to the error handler
                 self._error_handler.add_error(ConversionError(f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
                                                               f" cannot come before: {next_token.get_token_type()}"))
-
 
 
     def _handle_end_input(self):
