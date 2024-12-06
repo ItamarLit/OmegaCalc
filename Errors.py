@@ -25,7 +25,7 @@ class LexicalError(BaseCalcError):
         if self._error_pos[0] == self._error_pos[1]:
             return f"Lexical Error: {self._error_msg} at position: {self._error_pos[0]}"
         # the rest of the error msgs
-        return f"Lexical Error: {self._error_msg} at position: {self._error_pos[0]} -> {self._error_pos[1]}"
+        return f"Lexical Error: {self._error_msg} ,at position: {self._error_pos[0]} -> {self._error_pos[1]}"
 
 
 class ConversionError(BaseCalcError):

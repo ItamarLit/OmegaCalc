@@ -1,6 +1,7 @@
 from Operators import OpData
 from Errors import BaseCalcError
 
+
 class OutputHandler:
     """
     This is the output class used for all the outputs to the cli
@@ -33,8 +34,4 @@ class OutputHandler:
 
     @staticmethod
     def output_error(error: BaseCalcError):
-        print("--------------------------")
         print(error)
-        print("--------------------------")
-
-
