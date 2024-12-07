@@ -180,13 +180,17 @@ class Converter:
         :return:
         """
         if token_list[cur_index].get_token_type() == "U-":
-            next_token = token_list[cur_index + 1]
+            if len(token_list) > 1:
+                next_token = token_list[cur_index + 1]
 
-            if next_token.get_token_type() != "Number" and next_token.get_token_type() != "(" and next_token.get_token_type() != "U-":
-                # add the error to the error handler
+                if next_token.get_token_type() != "Number" and next_token.get_token_type() != "(" and next_token.get_token_type() != "U-":
+                    # add the error to the error handler
+                    self._error_handler.add_error(ConversionError(
+                        f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
+                        f" cannot come before: {next_token.get_token_type()}"))
+            else:
                 self._error_handler.add_error(ConversionError(
-                    f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
-                    f" cannot come before: {next_token.get_token_type()}"))
+                    f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"))
 
     def _handle_end_input(self):
         """

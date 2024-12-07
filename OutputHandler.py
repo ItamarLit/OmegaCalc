@@ -34,5 +34,5 @@ class OutputHandler:
         print("Welcome to my special calculator, to see all the valid operators please write: op")
 
     @staticmethod
-    def output_error(error: str):
+    def output_error(error: BaseCalcError):
         print(error)
