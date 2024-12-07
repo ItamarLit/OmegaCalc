@@ -67,6 +67,11 @@ class Tokenizer:
         self._error_handler.check_errors()
 
     def _get_cur_char_type(self, char) -> str:
+        """
+        Func that decides the current token type based on the char
+        :param char:
+        :return: string that represents the token type
+        """
         if char in self._number_pattern:
             return "Number"
         elif char in OpData.get_op_keys():
@@ -98,7 +103,7 @@ class Tokenizer:
         char = cleaned_exp[cur_pos]
         if char == '-':
             # check if the minus is unary or not
-            current_token_value = self._check_unary_minus()
+            current_token_value = self._check_unary_minus(cleaned_exp, cur_pos)
             current_token_type = current_token_value
         else:
             current_token_value = char
@@ -117,9 +122,10 @@ class Tokenizer:
 
     def _get_number_token(self, cleaned_exp: str, starting_index: int):
         """
+        Func that returns the number token, even if it is invalid, this func doesn check the token
         :param cleaned_exp:
         :param starting_index:
-        :return: returns the number token, this is not yet a checked valid number, also returns the next index to start from
+        :return: returns the number token, also returns the next index to start from
         """
         cur_index = starting_index
         current_token = cleaned_exp[cur_index]
@@ -131,6 +137,7 @@ class Tokenizer:
 
     def _check_number(self, number_value: str):
         """
+        Func that checks the number token to see if it is valid
         :param number_value:
         :return: checks if the number is of valid form
         """
@@ -138,29 +145,42 @@ class Tokenizer:
             return "Number"
         return "Number_Error"
 
-    def get_tokens(self):
+    def get_tokens(self) -> list:
+        """
+        Func that returns the token list
+        :return: list of tokens
+        """
         return self._token_list
 
     def clear_tokens(self):
+        """
+        Func that clears the used token list
+        """
         self._token_list = []
 
-    def _check_unary_minus(self):
+    def _check_unary_minus(self, cleaned_exp, cur_pos):
         """
-        :return: check if the minus is unary or binary
+        Func that checks if a minus is unary or binary
+        :return: minus type
         """
+        # make sure that (-) is a binary minus for future error handling
+        if len(self._token_list) >= 1 and self._token_list[-1].get_token_type() == '(' and len(cleaned_exp) >= 3 and cleaned_exp[cur_pos + 1] == ')':
+            return '-'
+
         if len(self._token_list) == 0 or (
                 self._token_list[-1].get_token_type() not in ["Number", ")"] and
-                not isinstance(self._token_list[-1].get_token_value(), type(OpData.get_op_class('!')))
-        ):
+                not isinstance(self._token_list[-1].get_token_value(), type(OpData.get_op_class('!')))):
+
             return "U-"
         else:
             return '-'
 
     def _handle_invalid_char(self, cleaned_exp, cur_pos):
         """
+        Func that collects an invalid token and decides the correct error type
         :param cleaned_exp:
         :param cur_pos:
-        :return: Handles the invalid char errors
+        :return: current_token, current_token_type, cur_pos
         """
         current_token_type = "Invalid_Char_Error"
         current_token = cleaned_exp[cur_pos]
