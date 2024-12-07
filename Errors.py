@@ -5,14 +5,19 @@ class BaseCalcError(ABC):
     """
     Base error class used to hold the main error msg
     """
+
     def __init__(self, error_msg):
         self._error_msg = error_msg
+
+    def get_msg(self):
+        return self._error_msg
 
 
 class LexicalError(BaseCalcError):
     """
     Class for all the errors that happen in the tokenizer
     """
+
     def __init__(self, error_msg, position):
         super().__init__(error_msg)
         self._error_pos = position
@@ -32,6 +37,7 @@ class ConversionError(BaseCalcError):
     """
     Class for all the errors that happen in the conversion stage
     """
+
     def __init__(self, error_msg):
         super().__init__(error_msg)
 
@@ -43,6 +49,7 @@ class EvaluationError(BaseCalcError):
     """
     Class for all the errors that happen in the final evaluation
     """
+
     def __init__(self, error_msg):
         super().__init__(error_msg)
 
@@ -54,6 +61,7 @@ class NegativeFactorialError(Exception):
     """
     Class for the negative factorial attempt error
     """
+
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
