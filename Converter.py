@@ -9,8 +9,10 @@ class Converter:
     The possible errors to get while converting are:
     1. Invalid paren ie missing ( to a ) token or missing ) to a (
     2. Invalid use of the ~ op ie it is not in front of a binary minus or a number
-    3. Invalid unary minus use, ie it isn't before (, a number or another unary minus to the right
-    4. Invalid use of binary op after ( ie 1(+2
+    3. Invalid use of the ! op ie no number or ) infront of it
+    4. Invalid unary minus use, ie it isn't before (, a number or another unary minus to the right
+    5. Invalid paren use check that there is a binary op before and after paren if they have a number next to them
+    6. empty parenthesis
     The output list will be a list of tokens in postfix so that I can give better errors in the evaluator (get the position of the error)
     """
 
@@ -52,7 +54,8 @@ class Converter:
         # the tilda op can only come before a unary minus or a number and before the tilda there was nothing or a binary op
         if next_token.get_token_type() != "Number" and not isinstance(next_token.get_token_value(), UMinus):
             return False
-        if prev_token is not None and not isinstance(prev_token.get_token_value(), IBinaryOperator):
+        if prev_token is not None and not isinstance(prev_token.get_token_value(), IBinaryOperator) and\
+                prev_token.get_token_type() != '(':
             return False
         return True
 
@@ -115,8 +118,8 @@ class Converter:
 
             if isinstance(next_token_value, IBinaryOperator) or next_token_type == '!':
                 self._error_handler.add_error(ConversionError(
-                    f"Invalid use of {next_token_type} at position:"
-                    f" {token_list[cur_index + 1].get_token_pos()[0]} cannot come after ("))
+                      f"Missing operands for token: {next_token_type} at position:"
+                    f" {token_list[cur_index + 1].get_token_pos()[0]}"))
                 return
 
             elif next_token_type == ')':
@@ -132,16 +135,14 @@ class Converter:
             if isinstance(prev_token_value, IBinaryOperator) or (
                     prev_token_type != '!' and isinstance(prev_token_value, IUnaryOperator)):
                 self._error_handler.add_error(ConversionError(
-                    f"Invalid use of {prev_token_type} at position:"
-                    f" {token_list[cur_index - 1].get_token_pos()[0]} cannot come before )"))
-                return
+                    f"Missing operands for token: {prev_token_type} at position:"
+                    f" {token_list[cur_index - 1].get_token_pos()[0]}"))
             # check that the token before the paren is not a number or !
-            elif next_token is not None and (next_token.get_token_type() == "U-"
+            if next_token is not None and (next_token.get_token_type() == "U-"
                                              or next_token.get_token_type() == "Number"):
-                print(next_token.get_token_type())
                 self._error_handler.add_error(ConversionError(
                     f"Invalid token after closing parentheses at position: {token_list[cur_index].get_token_pos()[0]}"))
-                return
+
 
     def _check_list_for_paren(self, paren_type: chr) -> bool:
         """
@@ -163,6 +164,7 @@ class Converter:
         # check if the token is unary
         if isinstance(current_op, IUnaryOperator):
             self._check_unary_minus(cur_index, token_list)
+            self._check_factorial(cur_index, token_list)
             self._op_stack.append(token)
         else:
             # binary op
@@ -229,3 +231,9 @@ class Converter:
         """
         self._op_stack = []
         self._output_lst = []
+
+    def _check_factorial(self, cur_index, token_list):
+        if token_list[cur_index].get_token_type() == '!':
+            prev_token = token_list[cur_index - 1]
+            if prev_token.get_token_type() != ")" or prev_token.get_token_type() != "Number":
+                self._error_handler.add_error(ConversionError(f"Invalid use of ! operator at position: {token_list[cur_index].get_token_pos()[0]}"))

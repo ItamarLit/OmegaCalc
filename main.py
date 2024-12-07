@@ -44,6 +44,7 @@ def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
         error_handler.show_errors()
     except Exception as e:
         # added an exception catch, this shouldn't happen
+        print(e)
         pass
 
 

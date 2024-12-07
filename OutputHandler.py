@@ -14,7 +14,8 @@ class OutputHandler:
         :param final_value:
         :return: None
         """
-        if final_value.is_integer():
+        # check if the value has decimal point
+        if final_value % 1 == 0:
             final_value = int(final_value)
         print(f"The value of the expression is: {final_value}")
 
@@ -33,5 +34,5 @@ class OutputHandler:
         print("Welcome to my special calculator, to see all the valid operators please write: op")
 
     @staticmethod
-    def output_error(error: BaseCalcError):
+    def output_error(error: str):
         print(error)

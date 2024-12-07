@@ -15,6 +15,7 @@ class Evaluator:
     def __init__(self, error_handler: ErrorHandler):
         self._error_handler = error_handler
         self._calculation_stack = []
+        self._encountered_fatal_error = False
 
     def eval(self, post_fix_token_list: list):
         for token in post_fix_token_list:
@@ -48,8 +49,9 @@ class Evaluator:
                 except NegativeFactorialError:
                     self._error_handler.add_error(EvaluationError(
                         f"Cannot perform factorial at position: {token.get_token_pos()[0]} on a negative number: {num_val}"))
+                    self._encountered_fatal_error = True
 
-            else:
+            elif not self._encountered_fatal_error:
                 # error missing operand for a unary token
                 self._error_handler.add_error(EvaluationError(f"Missing operand for unary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
         else:
@@ -62,9 +64,15 @@ class Evaluator:
                     self._calculation_stack.append(token_class.binary_evaluate(first_operand, second_operand))
                 except ZeroDivisionError:
                     self._error_handler.add_error(EvaluationError(f"Cannot divide value by 0"))
-            else:
+                    self._encountered_fatal_error = True
+                except Exception as e:
+                    self._error_handler.add_error(EvaluationError(e))
+
+
+            elif not self._encountered_fatal_error:
                 # error missing operand for binary op
-                if len(self._calculation_stack) == 0:
+                """
+                 if len(self._calculation_stack) == 0:
                     self._error_handler.add_error(
                         EvaluationError(
                             f"Missing operands for binary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
@@ -72,6 +80,12 @@ class Evaluator:
                     self._error_handler.add_error(
                         EvaluationError(
                             f"Missing operand for binary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
+                """
+
+                self._error_handler.add_error(
+                    EvaluationError(
+                        f"Missing operands for binary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
+
 
     def _handle_number_token(self, token):
         """
@@ -83,3 +97,5 @@ class Evaluator:
 
     def clear_evaluator(self):
         self._calculation_stack = []
+        self._encountered_fatal_error = False
+
