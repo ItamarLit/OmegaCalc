@@ -161,17 +161,12 @@ class Converter:
         :return:
         """
         current_op = token.get_token_value()
-        # check if the token is unary
-        if isinstance(current_op, IUnaryOperator):
-            self._check_unary_minus(cur_index, token_list)
-            self._check_factorial(cur_index, token_list)
-            self._op_stack.append(token)
-        else:
-            # binary op
-            while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
-                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(self._output_lst) != 0:
-                self._output_lst.append(self._op_stack.pop())
-            self._op_stack.append(token)
+        while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
+                self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(
+            self._output_lst) != 0:
+            self._output_lst.append(self._op_stack.pop())
+        self._op_stack.append(token)
+
 
     def _check_unary_minus(self, cur_index, token_list):
         """
@@ -239,5 +234,5 @@ class Converter:
     def _check_factorial(self, cur_index, token_list):
         if token_list[cur_index].get_token_type() == '!':
             prev_token = token_list[cur_index - 1]
-            if prev_token.get_token_type() != ")" or prev_token.get_token_type() != "Number":
+            if prev_token.get_token_type() != ")" and prev_token.get_token_type() != "Number":
                 self._error_handler.add_error(ConversionError(f"Invalid use of ! operator at position: {token_list[cur_index].get_token_pos()[0]}"))

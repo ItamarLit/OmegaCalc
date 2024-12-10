@@ -167,13 +167,13 @@ class OpData(ABC):
         '*': Multiplication(2, '*', "This operator multiplies two operands"),
         '/': Division(2, '/', "This operator divides two operands"),
         '&': Min(6, '&', "This operator gives the minimum between two operands"),
-        '^': Power(3, '^', "This operator is the power operator"),
+        '^': Power(4, '^', "This operator is the power operator"),
         '%': Modulo(5, '%', "This operator is the modulo operator"),
         '$': Max(6, '$', "This operator gives the maximum between two operands"),
         '@': Avg(6, '@', "This operator gives the average between two operands"),
         '!': Factorial(7, '!', "This operator returns the factorial of a a single un-negative operand"),
         '~': Negative(7, '~', "This is the negative operator"),
-        'U-': UMinus(4, '-', "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
+        'U-': UMinus(3, '-', "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
     }
 
     @staticmethod

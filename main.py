@@ -6,6 +6,9 @@ from OutputHandler import OutputHandler
 
 
 def main():
+    run_calc()
+
+def run_calc():
     error_handler = ErrorHandler()
     tokenizer = Tokenizer(error_handler)
     converter = Converter(error_handler)
@@ -20,11 +23,10 @@ def main():
         elif input_exp.lower() == "op":
             OutputHandler.output_op_data()
         else:
-            run_calc(input_exp, tokenizer, converter, evaluator, error_handler)
+            run_exp(input_exp, tokenizer, converter, evaluator, error_handler)
             clear_values(tokenizer, converter, evaluator, error_handler)
 
-
-def run_calc(input_exp, tokenizer, converter, evaluator, error_handler):
+def run_exp(input_exp, tokenizer, converter, evaluator, error_handler):
     """
     Main calc func to preform all the func on the inputed expression and print the output
     :param evaluator:
