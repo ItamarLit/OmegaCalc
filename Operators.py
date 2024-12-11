@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import pow
-from Errors import NegativeFactorialError
+from Errors import InvalidFactorialError
 
 
 @dataclass
@@ -138,10 +138,11 @@ class Factorial(IUnaryOperator, Operator):
     Class for the ! op
     """
 
-    def unary_evaluate(self, num1: float) -> float:
+    def unary_evaluate(self, num1: int) -> int:
         factorial = 1
-        if num1 < 0:
-            raise NegativeFactorialError("Cannot perform factorial on a negative number")
+        # check for non positive number and non int number
+        if num1 < 0 or num1 % 1 != 0:
+            raise InvalidFactorialError("Cannot perform factorial on a negative number")
         elif num1 > 0:
             for i in range(1, int(num1 + 1)):
                 factorial = factorial * i

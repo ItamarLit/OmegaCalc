@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Errors import EvaluationError, NegativeFactorialError
+from Errors import BaseCalcError, InvalidFactorialError
 from Operators import IUnaryOperator
 
 
@@ -46,14 +46,14 @@ class Evaluator:
                 num_val = self._calculation_stack.pop()
                 try:
                     self._calculation_stack.append(token_class.unary_evaluate(num_val))
-                except NegativeFactorialError:
-                    self._error_handler.add_error(EvaluationError(
-                        f"Cannot perform factorial at position: {token.get_token_pos()[0]} on a negative number: {num_val}"))
+                except InvalidFactorialError:
+                    self._error_handler.add_error(BaseCalcError(
+                        f"Cannot perform factorial at position: {token.get_token_pos()[0]} invalid factorial num: {num_val}"))
                     self._encountered_fatal_error = True
 
             elif not self._encountered_fatal_error:
                 # error missing operand for a unary token
-                self._error_handler.add_error(EvaluationError(f"Missing operand for unary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
+                self._error_handler.add_error(BaseCalcError(f"Missing operand for unary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
         else:
             # binary op
             if len(self._calculation_stack) > 1:
@@ -63,10 +63,10 @@ class Evaluator:
                 try:
                     self._calculation_stack.append(token_class.binary_evaluate(first_operand, second_operand))
                 except ZeroDivisionError:
-                    self._error_handler.add_error(EvaluationError(f"Cannot divide value by 0"))
+                    self._error_handler.add_error(BaseCalcError(f"Cannot divide value by 0"))
                     self._encountered_fatal_error = True
                 except Exception as e:
-                    self._error_handler.add_error(EvaluationError(e))
+                    self._error_handler.add_error(BaseCalcError(e))
 
 
             elif not self._encountered_fatal_error:
@@ -83,7 +83,7 @@ class Evaluator:
                 """
 
                 self._error_handler.add_error(
-                    EvaluationError(
+                    BaseCalcError(
                         f"Missing operands for binary operator: {token_type} at position: " + str(token.get_token_pos()[0])))
 
 

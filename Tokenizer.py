@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Errors import LexicalError
+from Errors import BaseCalcError
 from Operators import OpData
 
 
@@ -55,12 +55,11 @@ class Tokenizer:
                 # check if I need to add an error
                 if current_token_type in self._errors.keys():
                     self._error_handler.add_error(
-                        LexicalError(self._errors[current_token_type] + current_token_value,
-                                     (starting_index, cur_pos)))
+                        BaseCalcError(self._errors[current_token_type] + current_token_value))
                 cur_pos += 1
         else:
             # add an empty input error
-            self._error_handler.add_error(LexicalError(self._errors["Empty_Input_Error"], (-1, -1)))
+            self._error_handler.add_error(BaseCalcError(self._errors["Empty_Input_Error"]))
         # handle invalid operators at the start and end of the token list
         self._handle_invalid_operators()
         # check if we need to show errors
@@ -166,7 +165,6 @@ class Tokenizer:
         # make sure that (-) is a binary minus for future error handling
         if len(self._token_list) >= 1 and self._token_list[-1].get_token_type() == '(' and len(cleaned_exp) >= 3 and cleaned_exp[cur_pos + 1] == ')':
             return '-'
-
         if len(self._token_list) == 0 or (
                 self._token_list[-1].get_token_type() not in ["Number", ")"] and
                 not isinstance(self._token_list[-1].get_token_value(), type(OpData.get_op_class('!')))):
@@ -182,16 +180,19 @@ class Tokenizer:
         :param cur_pos:
         :return: current_token, current_token_type, cur_pos
         """
+        # save the starting pos
+        starting_pos = cur_pos
         current_token_type = "Invalid_Char_Error"
-        current_token = cleaned_exp[cur_pos]
+        current_token_value = cleaned_exp[cur_pos]
         cur_pos += 1
 
         while cur_pos < len(cleaned_exp) and cleaned_exp[cur_pos] not in self._valid_tokens:
             current_token_type = "Invalid_Chars_Error"
-            current_token += cleaned_exp[cur_pos]
+            current_token_value += cleaned_exp[cur_pos]
             cur_pos += 1
         cur_pos -= 1
-        return current_token, current_token_type, cur_pos
+        current_token_value = self._create_error_msg_with_pos(current_token_value, current_token_type, (starting_pos, cur_pos))
+        return current_token_value, current_token_type, cur_pos
 
     def _handle_invalid_operators(self):
         """
@@ -202,15 +203,28 @@ class Tokenizer:
             # check first token
             first_token = self._token_list[0]
             last_token = self._token_list[-1]
+            error_data = self._errors["Invalid_Usage"]
             if first_token.get_token_type() in self._invalid_start_pattern:
-                self._error_handler.add_error(
-                    LexicalError(self._errors["Invalid_Usage"] + first_token.get_token_type(),
-                                 first_token.get_token_pos()))
+                error_msg = self._create_error_msg_with_pos(error_data + first_token.get_token_type(), "Invalid_Usage", (first_token.get_token_pos()))
+                self._error_handler.add_error(BaseCalcError(error_msg))
+
             # check last token
             if last_token.get_token_type() in self._invalid_end_pattern:
-                self._error_handler.add_error(
-                    LexicalError(self._errors["Invalid_Usage"] + last_token.get_token_type(),
-                                 last_token.get_token_pos()))
+                error_msg = self._create_error_msg_with_pos(error_data + last_token.get_token_type(), "Invalid_Usage", (last_token.get_token_pos()))
+                self._error_handler.add_error(BaseCalcError(error_msg))
+
+    def _create_error_msg_with_pos(self, token_value: str, error_type: str, error_pos: tuple) -> str:
+        """
+        This func creates an informative error msg for the invalid chars errors
+        :param token_value:
+        :param error_type:
+        :return: string that represents the ending part of the error msg
+        """
+        if error_type == "Invalid_Chars_Error":
+            token_value += f" ,at position: {error_pos[0]} -> {error_pos[1]}"
+        else:
+            token_value += f" ,at position: {error_pos[0]}"
+        return token_value
 
 
 class Token:

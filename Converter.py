@@ -1,6 +1,6 @@
 from ErrorHandler import ErrorHandler
 from Operators import Operator, IUnaryOperator, IBinaryOperator, UMinus
-from Errors import ConversionError
+from Errors import BaseCalcError
 
 
 class Converter:
@@ -32,7 +32,7 @@ class Converter:
                 # check if we are on a tilda and if it is valid
                 if token.get_token_type() == '~' and not self._check_tilda_op(cur_index, token_list):
                     self._error_handler.add_error(
-                        ConversionError("Invalid use of ~ op at pos: " + str(token.get_token_pos()[0])))
+                        BaseCalcError("Invalid use of ~ op at pos: " + str(token.get_token_pos()[0])))
             else:
                 # the token is paren
                 self._handle_paren(token_list, cur_index)
@@ -90,7 +90,7 @@ class Converter:
                 self._op_stack.pop()
             else:
                 self._error_handler.add_error(
-                    ConversionError("Missing Opening parentheses to closing parentheses at position: " + str(
+                    BaseCalcError("Missing Opening parentheses to closing parentheses at position: " + str(
                         cur_token.get_token_pos()[0])))
 
     def _check_invalid_paren(self, token_list, cur_index):
@@ -113,18 +113,18 @@ class Converter:
             # check that the token before the paren is not a number or !
             if prev_token is not None and (
                     prev_token.get_token_type() == '!' or prev_token.get_token_type() == "Number"):
-                self._error_handler.add_error(ConversionError(
+                self._error_handler.add_error(BaseCalcError(
                     f"Invalid token before opening parentheses at position: {token_list[cur_index].get_token_pos()[0]}"))
 
             if isinstance(next_token_value, IBinaryOperator) or next_token_type == '!':
-                self._error_handler.add_error(ConversionError(
+                self._error_handler.add_error(BaseCalcError(
                       f"Missing operands for token: {next_token_type} at position:"
                     f" {token_list[cur_index + 1].get_token_pos()[0]}"))
                 return
 
             elif next_token_type == ')':
                 closing_paren_index = token_list[cur_index + 1].get_token_pos()[0]
-                self._error_handler.add_error(ConversionError(
+                self._error_handler.add_error(BaseCalcError(
                     f"Invalid empty parentheses at position: {closing_paren_index - 1} -> {closing_paren_index}"))
                 return
 
@@ -134,13 +134,13 @@ class Converter:
             prev_token_value = token_list[cur_index - 1].get_token_value()
             if isinstance(prev_token_value, IBinaryOperator) or (
                     prev_token_type != '!' and isinstance(prev_token_value, IUnaryOperator)):
-                self._error_handler.add_error(ConversionError(
+                self._error_handler.add_error(BaseCalcError(
                     f"Missing operands for token: {prev_token_type} at position:"
                     f" {token_list[cur_index - 1].get_token_pos()[0]}"))
             # check that the token before the paren is not a number or !
             if next_token is not None and (next_token.get_token_type() == "U-"
                                              or next_token.get_token_type() == "Number"):
-                self._error_handler.add_error(ConversionError(
+                self._error_handler.add_error(BaseCalcError(
                     f"Invalid token after closing parentheses at position: {token_list[cur_index].get_token_pos()[0]}"))
 
 
@@ -180,11 +180,11 @@ class Converter:
 
                 if next_token.get_token_type() != "Number" and next_token.get_token_type() != "(" and next_token.get_token_type() != "U-":
                     # add the error to the error handler
-                    self._error_handler.add_error(ConversionError(
+                    self._error_handler.add_error(BaseCalcError(
                         f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
                         f" cannot come before: {next_token.get_token_type()}"))
             else:
-                self._error_handler.add_error(ConversionError(
+                self._error_handler.add_error(BaseCalcError(
                     f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"))
 
     def _handle_end_input(self):
@@ -199,7 +199,7 @@ class Converter:
             for index in invalid_indexes:
                 # add the error
                 self._error_handler.add_error(
-                    ConversionError("Missing Closing parentheses to opening parentheses at position: " + str(
+                    BaseCalcError("Missing Closing parentheses to opening parentheses at position: " + str(
                         self._op_stack[index].get_token_pos()[0])))
         else:
             while len(self._op_stack) != 0:
@@ -235,4 +235,4 @@ class Converter:
         if token_list[cur_index].get_token_type() == '!':
             prev_token = token_list[cur_index - 1]
             if prev_token.get_token_type() != ")" and prev_token.get_token_type() != "Number":
-                self._error_handler.add_error(ConversionError(f"Invalid use of ! operator at position: {token_list[cur_index].get_token_pos()[0]}"))
+                self._error_handler.add_error(BaseCalcError(f"Invalid use of ! operator at position: {token_list[cur_index].get_token_pos()[0]}"))

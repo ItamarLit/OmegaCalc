@@ -38,9 +38,11 @@ def run_exp(input_exp, tokenizer, converter, evaluator, error_handler):
     """
     try:
         tokenizer.tokenize_expression(input_exp)
+
         converter.convert(tokenizer.get_tokens())
         evaluator.eval(converter.get_post_fix())
         OutputHandler.output_data(evaluator.get_final())
+
     except StopIteration:
         # if we get a stopIteration then we had an error
         error_handler.show_errors()
