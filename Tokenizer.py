@@ -60,13 +60,13 @@ class Tokenizer:
                 # check if I need to add an error
                 if current_token_type in self._errors.keys():
                     self._error_handler.add_error(
-                        BaseCalcError(self._errors[current_token_type] + current_token_value))
+                        BaseCalcError(current_token_type, self._errors[current_token_type] + current_token_value))
                 cur_pos += 1
         else:
             # add an empty input error
-            self._error_handler.add_error(BaseCalcError(self._errors["Empty_Input_Error"]))
+            self._error_handler.add_error(BaseCalcError("Empty_Input_Error",self._errors["Empty_Input_Error"]))
         # handle invalid operators at the start and end of the token list
-        self._handle_invalid_operators()
+        #self._handle_invalid_operators()
         # check if we need to show errors
         self._error_handler.check_errors()
 
@@ -214,12 +214,12 @@ class Tokenizer:
             error_data = self._errors["Invalid_Usage"]
             if first_token.get_token_type() in self._invalid_start_pattern:
                 error_msg = self._create_error_msg_with_pos(error_data + first_token.get_token_type(), "Invalid_Usage", (first_token.get_token_pos()))
-                self._error_handler.add_error(BaseCalcError(error_msg))
+                self._error_handler.add_error(BaseCalcError("Invalid_Usage",error_msg))
 
             # check last token
             if last_token.get_token_type() in self._invalid_end_pattern:
                 error_msg = self._create_error_msg_with_pos(error_data + last_token.get_token_type(), "Invalid_Usage", (last_token.get_token_pos()))
-                self._error_handler.add_error(BaseCalcError(error_msg))
+                self._error_handler.add_error(BaseCalcError("Invalid_Usage", error_msg))
 
     def _create_error_msg_with_pos(self, token_value: str, error_type: str, error_pos: tuple) -> str:
         """

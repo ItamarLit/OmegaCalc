@@ -49,16 +49,16 @@ class Evaluator:
             try:
                 self._calculation_stack.append(token_class.unary_evaluate(num_val))
             except InvalidFactorialError:
-                self._error_handler.add_error(BaseCalcError(
+                self._error_handler.add_error(BaseCalcError( "Invalid_Factorial_Error",
                     f"Cannot perform factorial at position: {token.get_token_pos()[0]} invalid factorial num: {num_val}"))
                 self._encountered_fatal_error = True
             except InvalidHashError:
-                self._error_handler.add_error(BaseCalcError(
+                self._error_handler.add_error(BaseCalcError("Invalid_Hash_Error",
                     f"Cannot perform hash at position: {token.get_token_pos()[0]} invalid negative num: {num_val}"))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard
-                self._error_handler.add_error(BaseCalcError(e))
+                self._error_handler.add_error(BaseCalcError("Safe_Guard_Error" ,e))
         else:
             second_operand = self._calculation_stack.pop()
             first_operand = self._calculation_stack.pop()
@@ -66,11 +66,11 @@ class Evaluator:
             try:
                 self._calculation_stack.append(token_class.binary_evaluate(first_operand, second_operand))
             except ZeroDivisionError:
-                self._error_handler.add_error(BaseCalcError(f"Cannot divide value by 0"))
+                self._error_handler.add_error(BaseCalcError("Zero_Div_Error", f"Cannot divide value by 0"))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard
-                self._error_handler.add_error(BaseCalcError(e))
+                self._error_handler.add_error(BaseCalcError("Safe_Guard_Error", e))
 
     def _handle_number_token(self, token):
         """

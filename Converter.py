@@ -73,8 +73,9 @@ class Converter:
                 self._op_stack.pop()
             else:
                 self._error_handler.add_error(
-                    BaseCalcError("Missing Opening parentheses to closing parentheses at position: " + str(
-                        cur_token.get_token_pos()[0])))
+                    BaseCalcError("Missing_Open_Paren_Error",
+                                  "Missing Opening parentheses to closing parentheses at position: " + str(
+                                      cur_token.get_token_pos()[0])))
 
     def _check_invalid_paren(self, token_list: list, cur_index: int):
         """
@@ -100,7 +101,7 @@ class Converter:
         # check token before (
         if prev_token and prev_token.get_token_type() in ['!', 'Number']:
             self._error_handler.add_error(
-                BaseCalcError(f"Invalid token before ( at position: {pos}")
+                BaseCalcError("Invalid_Before_Open_Paren_Error", f"Invalid token before ( at position: {pos}")
             )
 
         next_type = next_token.get_token_type()
@@ -108,7 +109,8 @@ class Converter:
         if next_type == ')':
             closing_pos = next_token.get_token_pos()[0]
             self._error_handler.add_error(
-                BaseCalcError(f"Invalid empty parentheses at position: {closing_pos - 1} -> {closing_pos}")
+                BaseCalcError("Invalid_Empty_Paren_Error",
+                              f"Invalid empty parentheses at position: {closing_pos - 1} -> {closing_pos}")
             )
 
     def _check_closing_paren(self, prev_token: Token, next_token: Token, pos: int):
@@ -118,15 +120,16 @@ class Converter:
         :param next_token:
         :param pos:
         """
-        if not prev_token:
-            self._error_handler.add_error(
-                BaseCalcError(f"Invalid ) at position: {pos} (no opening parenthesis)")
-            )
-            return
+
+        #if not prev_token:
+        #    self._error_handler.add_error(
+        #        BaseCalcError("Missing_Open_Paren", f"Invalid ) at position: {pos} (no opening parenthesis)")
+        #    )
+        #    return
         # check token after )
         if next_token and next_token.get_token_type() in ["U-", "Number"]:
             self._error_handler.add_error(
-                BaseCalcError(f"Invalid token after ) at position: {pos}")
+                BaseCalcError("Invalid_After_Close_Paren_Error", f"Invalid token after ) at position: {pos}")
             )
 
     def _check_list_for_paren(self, paren_type: chr) -> bool:
@@ -150,7 +153,8 @@ class Converter:
             self._op_stack.append(self._unary_sign_token)
         else:
             while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
-                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(self._output_lst) != 0:
+                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(
+                self._output_lst) != 0:
                 self._output_lst.append(self._op_stack.pop())
             self._op_stack.append(token)
 
@@ -165,13 +169,13 @@ class Converter:
             for index in invalid_indexes:
                 # add the error
                 self._error_handler.add_error(
-                    BaseCalcError("Missing Closing parentheses to opening parentheses at position: " + str(
+                    BaseCalcError("Missing_Close_Paren_Error", "Missing Closing parentheses to opening parentheses at position: " + str(
                         self._op_stack[index].get_token_pos()[0])))
         else:
             while len(self._op_stack) != 0:
                 self._output_lst.append(self._op_stack.pop())
 
-    def check_precedence(self, op_token1: Operator, op_token2: Operator) -> int:
+    def check_precedence(self, op_token1: Operator, op_token2: Operator) -> float:
         """
         This func will return:
         neg num if op1 < op2
@@ -217,11 +221,11 @@ class Converter:
         if not func(cur_index, token_list):
             if current_token_placment != "mid":
                 self._error_handler.add_error(
-                    BaseCalcError(
-                        f"Invalid use of {current_token.get_token_value().get_op_value()} at position: {current_token.get_token_pos()[0]}"))
+                    BaseCalcError("Invalid_Unary_Usage_Error",
+                        f"Invalid usage of: {current_token.get_token_value().get_op_value()} at position: {current_token.get_token_pos()[0]}"))
             else:
                 self._error_handler.add_error(
-                    BaseCalcError(
+                    BaseCalcError("Missing_Operands_Error",
                         f"Missing operands for: {current_token.get_token_type()} at position: {current_token.get_token_pos()[0]}"))
                 if cur_index + 1 < len(token_list) and isinstance(token_list[cur_index + 1].get_token_value(), Operator):
                     self._hit_missing_operands_error = True
