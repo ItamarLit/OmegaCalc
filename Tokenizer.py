@@ -92,9 +92,13 @@ class Tokenizer:
         :param cur_pos:
         :return: current_token_value, current_token_type, cur_pos
         """
+        starting_pos = cur_pos
         current_token_value, cur_pos = self._get_number_token(cleaned_exp, cur_pos)
         # check if the number was valid
         current_token_type = self._check_number(current_token_value)
+        # create the error type if needed
+        if current_token_type == "Number_Error":
+            current_token_value = self._create_error_msg_with_pos(current_token_value, current_token_type, (starting_pos, cur_pos))
         return current_token_value, current_token_type, cur_pos
 
     def _handle_operator(self, cleaned_exp: str, cur_pos: int):
@@ -190,7 +194,6 @@ class Tokenizer:
         current_token_type = "Invalid_Char_Error"
         current_token_value = cleaned_exp[cur_pos]
         cur_pos += 1
-
         while cur_pos < len(cleaned_exp) and cleaned_exp[cur_pos] not in self._valid_tokens:
             current_token_type = "Invalid_Chars_Error"
             current_token_value += cleaned_exp[cur_pos]
@@ -225,7 +228,7 @@ class Tokenizer:
         :param error_type:
         :return: string that represents the ending part of the error msg
         """
-        if error_type == "Invalid_Chars_Error":
+        if error_type == "Invalid_Chars_Error" or error_type == "Number_Error":
             token_value += f" ,at position: {error_pos[0]} -> {error_pos[1]}"
         else:
             token_value += f" ,at position: {error_pos[0]}"
