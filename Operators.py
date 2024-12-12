@@ -7,7 +7,7 @@ from Errors import InvalidFactorialError
 @dataclass
 class Operator(ABC):
     """
-    Abstract operator data class for all the same funcs in all the operators
+    Abstract operator data class for all the same funcs and data in all the operators
     """
     _precedence: int
     _value: str
@@ -87,9 +87,13 @@ class Power(IBinaryOperator, Operator):
     """
     Class for the ^ op
     """
-
     def binary_evaluate(self, num1: float, num2: float) -> float:
-        return pow(num1, num2)
+        if num2 <= 0 or num2 < 100 or num1 < 100:
+            return pow(num1, num2)
+        else:
+            num1 = int(num1)
+            num2 = int(num2)
+            return num1 ** num2
 
 
 class Max(IBinaryOperator, Operator):
@@ -146,7 +150,7 @@ class Factorial(IUnaryOperator, Operator):
         factorial = 1
         # check for non positive number and non int number
         if num1 < 0 or num1 % 1 != 0:
-            raise InvalidFactorialError("Cannot perform factorial on a negative number")
+            raise InvalidFactorialError("Cannot perform factorial on invalid number")
         elif num1 > 0:
             for i in range(1, int(num1 + 1)):
                 factorial = factorial * i

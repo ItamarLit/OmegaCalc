@@ -9,7 +9,7 @@ class Tokenizer:
     The errors will be saved, possible errors in this state:
     1. Invalid chars used in expression ie any char that is not in the valid tokens string
     2. Invalid Number format in expression ie 1234.. or 123.
-    3. Invalid usage of an operator ie an op that can start or end the exp
+    3. Invalid usage of an operator (an op that can't start or end the exp)
     """
 
     def __init__(self, error_handler: ErrorHandler):
@@ -38,6 +38,11 @@ class Tokenizer:
         }
 
     def tokenize_expression(self, exp):
+        """
+        This is the main tokenize func it will create a list of tokens that are in the string
+        including error tokens and will catch any errors in the process
+        :param exp:
+        """
         # remove all white spaces and turn the expression into a list
         cleaned_exp = ''.join(exp.split())
         cur_pos = 0
@@ -65,7 +70,7 @@ class Tokenizer:
         # check if we need to show errors
         self._error_handler.check_errors()
 
-    def _get_cur_char_type(self, char) -> str:
+    def _get_cur_char_type(self, char: str) -> str:
         """
         Func that decides the current token type based on the char
         :param char:
@@ -80,7 +85,7 @@ class Tokenizer:
         else:
             return "Invalid_Char"
 
-    def _handle_number(self, cleaned_exp, cur_pos):
+    def _handle_number(self, cleaned_exp: str, cur_pos: int):
         """
         Func that handles the number tokens
         :param cleaned_exp:
@@ -92,9 +97,9 @@ class Tokenizer:
         current_token_type = self._check_number(current_token_value)
         return current_token_value, current_token_type, cur_pos
 
-    def _handle_operator(self, cleaned_exp, cur_pos):
+    def _handle_operator(self, cleaned_exp: str, cur_pos: int):
         """
-        Func to handle the operator tokens
+        Func to tokenize the different operators, including unary minus
         :param cleaned_exp:
         :param cur_pos:
         :return: current_token_value, current_token_type, cur_pos
@@ -110,9 +115,9 @@ class Tokenizer:
         current_token_value = OpData.get_op_class(current_token_value)
         return current_token_value, current_token_type, cur_pos
 
-    def _handle_paren(self, cleaned_exp, cur_pos):
+    def _handle_paren(self, cleaned_exp: str, cur_pos: int):
         """
-        Func to handle the paren tokens
+        Func to tokenize the parentheses
         :param cleaned_exp:
         :param cur_pos:
         :return: current_token_value, current_token_type, cur_pos
@@ -121,7 +126,7 @@ class Tokenizer:
 
     def _get_number_token(self, cleaned_exp: str, starting_index: int):
         """
-        Func that returns the number token, even if it is invalid, this func doesn check the token
+        Func that returns the number token, even if it is invalid, this func doesn't check the token
         :param cleaned_exp:
         :param starting_index:
         :return: returns the number token, also returns the next index to start from
@@ -138,7 +143,7 @@ class Tokenizer:
         """
         Func that checks the number token to see if it is valid
         :param number_value:
-        :return: checks if the number is of valid form
+        :return: "Number" if the number token is valid else it returns "Number_Error"
         """
         if number_value.count('.') <= 1 and not number_value.startswith('.') and not number_value.endswith('.'):
             return "Number"
@@ -157,7 +162,7 @@ class Tokenizer:
         """
         self._token_list = []
 
-    def _check_unary_minus(self, cleaned_exp, cur_pos):
+    def _check_unary_minus(self, cleaned_exp: str, cur_pos: int):
         """
         Func that checks if a minus is unary or binary
         :return: minus type
@@ -173,7 +178,7 @@ class Tokenizer:
         else:
             return '-'
 
-    def _handle_invalid_char(self, cleaned_exp, cur_pos):
+    def _handle_invalid_char(self, cleaned_exp: str, cur_pos: int):
         """
         Func that collects an invalid token and decides the correct error type
         :param cleaned_exp:
@@ -230,6 +235,8 @@ class Tokenizer:
 class Token:
     """
     This class is used to hold information about the different tokens
+    the token value can be a string if the token is a number or parentheses, it can also be an operator class instance
+    if the token is an operator
     """
 
     def __init__(self, token_type: str, token_value, starting_index: int, ending_index: int):

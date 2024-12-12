@@ -12,7 +12,6 @@ class OutputHandler:
         """
         Output func that will make the output an int value if it has no decimal numbers
         :param final_value:
-        :return: None
         """
         # check if the value has decimal point
         if final_value % 1 == 0:
@@ -21,6 +20,9 @@ class OutputHandler:
 
     @staticmethod
     def output_op_data():
+        """
+        This func will show descriptions of all the possible operators in the calc
+        """
         print("--------------------------")
         for op_type, op_class in OpData.get_op_classes():
             if op_type == "U-":
