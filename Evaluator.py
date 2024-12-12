@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Errors import BaseCalcError, InvalidFactorialError
+from Errors import BaseCalcError, InvalidFactorialError, InvalidHashError
 from Operators import IUnaryOperator
 
 
@@ -51,6 +51,10 @@ class Evaluator:
             except InvalidFactorialError:
                 self._error_handler.add_error(BaseCalcError(
                     f"Cannot perform factorial at position: {token.get_token_pos()[0]} invalid factorial num: {num_val}"))
+                self._encountered_fatal_error = True
+            except InvalidHashError:
+                self._error_handler.add_error(BaseCalcError(
+                    f"Cannot perform hash at position: {token.get_token_pos()[0]} invalid negative num: {num_val}"))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard

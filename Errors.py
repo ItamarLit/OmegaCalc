@@ -18,8 +18,19 @@ class BaseCalcError:
 
 class InvalidFactorialError(Exception):
     """
-    Class for the negative factorial attempt error
+    Class for the invalid factorial attempt error
     """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidHashError(Exception):
+    """
+    Class for the negative hash attempt error
+    """
+
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)

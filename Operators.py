@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import pow
-from Errors import InvalidFactorialError
+from Errors import InvalidFactorialError, InvalidHashError
 
 
 @dataclass
@@ -9,12 +9,12 @@ class Operator(ABC):
     """
     Abstract operator data class for all the same funcs and data in all the operators
     """
-    _precedence: int
+    _precedence: float
     _value: str
     _placement: str
     _description: str
 
-    def get_precedence(self) -> int:
+    def get_precedence(self) -> float:
         return self._precedence
 
     def get_op_value(self) -> str:
@@ -166,6 +166,20 @@ class Negative(IUnaryOperator, Operator):
         return num1 * -1
 
 
+class Hash(IUnaryOperator, Operator):
+    """
+    Class for the hash op
+    """
+    def unary_evaluate(self, num1: float) -> float:
+        output = 0
+        if num1 < 0:
+            raise InvalidHashError("Invalid negative hash")
+        for char in str(num1):
+            if char != '.':
+                output = output + int(char)
+        return output
+
+
 class OpData(ABC):
     """
     Static Class to handle the operator data
@@ -175,14 +189,15 @@ class OpData(ABC):
         '-': Minus(1, '-', "mid", "This operator subtracts two operands"),
         '*': Multiplication(2, '*', "mid", "This operator multiplies two operands"),
         '/': Division(2, '/', "mid", "This operator divides two operands"),
-        '&': Min(6, '&', "mid", "This operator gives the minimum between two operands"),
-        '^': Power(4, '^', "mid", "This operator is the power operator"),
-        '%': Modulo(5, '%', "mid", "This operator is the modulo operator"),
-        '$': Max(6, '$', "mid", "This operator gives the maximum between two operands"),
-        '@': Avg(6, '@', "mid", "This operator gives the average between two operands"),
-        '!': Factorial(7, '!', "right", "This operator returns the factorial of a a single un-negative operand"),
-        '~': Negative(7, '~', "left", "This is the negative operator"),
-        'U-': UMinus(3, '-', "left",
+        '&': Min(5, '&', "mid", "This operator gives the minimum between two operands"),
+        '^': Power(3, '^', "mid", "This operator is the power operator"),
+        '%': Modulo(4, '%', "mid", "This operator is the modulo operator"),
+        '$': Max(5, '$', "mid", "This operator gives the maximum between two operands"),
+        '@': Avg(5, '@', "mid", "This operator gives the average between two operands"),
+        '!': Factorial(6, '!', "right", "This operator returns the factorial of a a single un-negative operand"),
+        '~': Negative(6, '~', "left", "This is the negative operator"),
+        '#': Hash(6, '#', "right", "This operator combines the digits of a positive number"),
+        'U-': UMinus(2.5, '-', "left",
                      "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
     }
 

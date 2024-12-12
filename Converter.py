@@ -239,7 +239,9 @@ class Converter:
             return False
         next_type = next_token.get_token_type()
         if cur_type == '~':
-            return next_type in ("U-", "Number")
+            # for tilda we check that it isnt between two numbers as this is illegal we can do that
+            # by checking if it is a valid right op and then we know it is invalid tilda usage
+            return next_type in ("U-", "Number") and not self._check_right_op(cur_index, token_list)
         elif cur_type == "U-":
             return next_type in ("Number", "(", "U-")
         else:
@@ -253,10 +255,10 @@ class Converter:
         :return: False if non valid, else true
         """
         prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
-        prev_type = prev_token.get_token_type()
-        if prev_type is None:
+        if prev_token is None:
             return False
-        return prev_type in ("Number", ")", "!")
+        prev_type = prev_token.get_token_type()
+        return prev_type in ("Number", ")", "!", '#')
 
     def _check_mid_op(self, cur_index: int, token_list: list) -> bool:
         """
