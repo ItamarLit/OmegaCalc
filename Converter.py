@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Operators import Operator, UMinus
+from Operators import Operator, UMinus, ILeftSidedOp, IRightSidedOp
 from Errors import BaseCalcError
 from Tokenizer import Token
 
@@ -238,6 +238,7 @@ class Converter:
         if next_token is None:
             return False
         next_type = next_token.get_token_type()
+        next_value = next_token.get_token_value()
         if cur_type == '~':
             # for tilda we check that it isnt between two numbers as this is illegal we can do that
             # by checking if it is a valid right op and then we know it is invalid tilda usage
@@ -245,7 +246,7 @@ class Converter:
         elif cur_type == "U-":
             return next_type in ("Number", "(", "U-")
         else:
-            return next_type in ("Number", "(", "U-", "~")
+            return next_type in ("Number", "(") or isinstance(next_value, ILeftSidedOp)
 
     def _check_right_op(self, cur_index: int, token_list: list) -> bool:
         """
@@ -258,7 +259,8 @@ class Converter:
         if prev_token is None:
             return False
         prev_type = prev_token.get_token_type()
-        return prev_type in ("Number", ")", "!", '#')
+        prev_value = prev_token.get_token_value()
+        return prev_type in ("Number", ")") or isinstance(prev_value, IRightSidedOp)
 
     def _check_mid_op(self, cur_index: int, token_list: list) -> bool:
         """

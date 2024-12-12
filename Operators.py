@@ -47,6 +47,18 @@ class IUnaryOperator(ABC):
         pass
 
 
+class ILeftSidedOp(ABC):
+    """
+    Marker interface for the ops that come to the left of a value
+    """
+
+
+class IRightSidedOp(ABC):
+    """
+    Marker interface for the ops that come to the right of a value
+    """
+
+
 class Plus(IBinaryOperator, Operator):
     """
     Class for the + op
@@ -132,7 +144,7 @@ class Avg(IBinaryOperator, Operator):
         return (num1 + num2) / 2
 
 
-class UMinus(IUnaryOperator, Operator):
+class UMinus(IUnaryOperator, Operator, ILeftSidedOp):
     """
     Class for the unary minus
     """
@@ -141,7 +153,7 @@ class UMinus(IUnaryOperator, Operator):
         return num1 * -1
 
 
-class Factorial(IUnaryOperator, Operator):
+class Factorial(IUnaryOperator, Operator, IRightSidedOp):
     """
     Class for the ! op
     """
@@ -157,7 +169,7 @@ class Factorial(IUnaryOperator, Operator):
         return factorial
 
 
-class Negative(IUnaryOperator, Operator):
+class Negative(IUnaryOperator, Operator, ILeftSidedOp):
     """
     Class for the ~ op
     """
@@ -166,7 +178,7 @@ class Negative(IUnaryOperator, Operator):
         return num1 * -1
 
 
-class Hash(IUnaryOperator, Operator):
+class Hash(IUnaryOperator, Operator, IRightSidedOp):
     """
     Class for the hash op
     """
