@@ -232,7 +232,7 @@ class Token:
     This class is used to hold information about the different tokens
     """
 
-    def __init__(self, token_type: str, token_value: str, starting_index: int, ending_index: int):
+    def __init__(self, token_type: str, token_value, starting_index: int, ending_index: int):
         self._token_type = token_type
         self._token_value = token_value
         self._starting_index = starting_index

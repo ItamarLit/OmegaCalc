@@ -11,6 +11,7 @@ class Operator(ABC):
     """
     _precedence: int
     _value: str
+    _placement: str
     _description: str
 
     def get_precedence(self) -> int:
@@ -21,6 +22,9 @@ class Operator(ABC):
 
     def get_description(self) -> str:
         return self._description
+
+    def get_placement(self) -> str:
+        return self._placement
 
 
 class IBinaryOperator(ABC):
@@ -163,18 +167,19 @@ class OpData(ABC):
     Static Class to handle the operator data
     """
     operatorData = {
-        '+': Plus(1, '+', "This operator adds two operands"),
-        '-': Minus(1, '-', "This operator subtracts two operands"),
-        '*': Multiplication(2, '*', "This operator multiplies two operands"),
-        '/': Division(2, '/', "This operator divides two operands"),
-        '&': Min(6, '&', "This operator gives the minimum between two operands"),
-        '^': Power(4, '^', "This operator is the power operator"),
-        '%': Modulo(5, '%', "This operator is the modulo operator"),
-        '$': Max(6, '$', "This operator gives the maximum between two operands"),
-        '@': Avg(6, '@', "This operator gives the average between two operands"),
-        '!': Factorial(7, '!', "This operator returns the factorial of a a single un-negative operand"),
-        '~': Negative(7, '~', "This is the negative operator"),
-        'U-': UMinus(3, '-', "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
+        '+': Plus(1, '+', "mid", "This operator adds two operands"),
+        '-': Minus(1, '-', "mid", "This operator subtracts two operands"),
+        '*': Multiplication(2, '*', "mid", "This operator multiplies two operands"),
+        '/': Division(2, '/', "mid", "This operator divides two operands"),
+        '&': Min(6, '&', "mid", "This operator gives the minimum between two operands"),
+        '^': Power(4, '^', "mid", "This operator is the power operator"),
+        '%': Modulo(5, '%', "mid", "This operator is the modulo operator"),
+        '$': Max(6, '$', "mid", "This operator gives the maximum between two operands"),
+        '@': Avg(6, '@', "mid", "This operator gives the average between two operands"),
+        '!': Factorial(7, '!', "right", "This operator returns the factorial of a a single un-negative operand"),
+        '~': Negative(7, '~', "left", "This is the negative operator"),
+        'U-': UMinus(3, '-', "left",
+                     "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
     }
 
     @staticmethod

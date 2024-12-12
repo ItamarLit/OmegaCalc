@@ -1,18 +1,16 @@
 from ErrorHandler import ErrorHandler
-from Operators import Operator, IUnaryOperator, IBinaryOperator, UMinus
+from Operators import Operator, UMinus
 from Errors import BaseCalcError
-
+from Tokenizer import Token
 
 class Converter:
     """
     Class that converts an infix token list into a postfix token list
     The possible errors to get while converting are:
     1. Invalid paren ie missing ( to a ) token or missing ) to a (
-    2. Invalid use of the ~ op ie it is not in front of a binary minus or a number
-    3. Invalid use of the ! op ie no number or ) infront of it
-    4. Invalid unary minus use, ie it isn't before (, a number or another unary minus to the right
-    5. Invalid paren use check that there is a binary op before and after paren if they have a number next to them
-    6. empty parenthesis
+    2. Invalid operator usage (double operators / invalid unary op usage)
+    3. Invalid paren use check that there is a binary op before and after paren if they have a number next to them
+    4. empty parenthesis
     The output list will be a list of tokens in postfix so that I can give better errors in the evaluator (get the position of the error)
     """
 
@@ -20,6 +18,9 @@ class Converter:
         self._error_handler = error_handler
         self._output_lst = []
         self._op_stack = []
+        self._hit_missing_operands_error = False
+        self._signed_minus_indexes = []
+        self._unary_sign_token = Token("U-", UMinus(8, '-', "left", ""), -1, -1)
 
     def convert(self, token_list):
         # convert infix token list to post fix
@@ -28,11 +29,8 @@ class Converter:
             if token.get_token_type() == "Number":
                 self._handle_number(token)
             elif isinstance(token.get_token_value(), Operator):
+                self._check_operator_placement(cur_index, token_list)
                 self._handle_operator(token, cur_index, token_list)
-                # check if we are on a tilda and if it is valid
-                if token.get_token_type() == '~' and not self._check_tilda_op(cur_index, token_list):
-                    self._error_handler.add_error(
-                        BaseCalcError("Invalid use of ~ op at pos: " + str(token.get_token_pos()[0])))
             else:
                 # the token is paren
                 self._handle_paren(token_list, cur_index)
@@ -41,23 +39,6 @@ class Converter:
         self._handle_end_input()
         # check if we need to show errors
         self._error_handler.check_errors()
-
-    def _check_tilda_op(self, cur_index, token_list):
-        """
-        Func that checks if the tilda is received in a valid way
-        :param cur_index:
-        :param token_list:
-        :return:
-        """
-        next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
-        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
-        # the tilda op can only come before a unary minus or a number and before the tilda there was nothing or a binary op
-        if next_token.get_token_type() != "Number" and not isinstance(next_token.get_token_value(), UMinus):
-            return False
-        if prev_token is not None and not isinstance(prev_token.get_token_value(), IBinaryOperator) and\
-                prev_token.get_token_type() != '(':
-            return False
-        return True
 
     def _handle_number(self, token):
         """
@@ -95,54 +76,58 @@ class Converter:
 
     def _check_invalid_paren(self, token_list, cur_index):
         """
-        This func is used to check for any errors in the expression that have to do with paren
-        :param token_list:
-        :param cur_index:
+        Checks for any errors with paren in the expression.
+        """
+        cur_token = token_list[cur_index]
+        cur_paren = cur_token.get_token_type()
+        pos = cur_token.get_token_pos()[0]
+        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
+        next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
+        if cur_paren == '(':
+            self._check_opening_paren(prev_token, next_token, pos)
+        else:
+            self._check_closing_paren(prev_token, next_token, pos)
+
+    def _check_opening_paren(self, prev_token, next_token, pos):
+        """
+        Check all errors with opening paren
+        :param prev_token:
+        :param next_token:
+        :param pos:
         :return:
         """
-        cur_paren = token_list[cur_index].get_token_type()
-        next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
-        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
+        # check token before (
+        if prev_token and prev_token.get_token_type() in ['!', 'Number']:
+            self._error_handler.add_error(
+                BaseCalcError(f"Invalid token before ( at position: {pos}")
+            )
 
-        # opening paren, check if next token is a binary op or !
-        if cur_paren == '(':
-            # ( can never finish an exp so i dont need to check if cur_index + 1 is none
-            next_token_type = next_token.get_token_type()
-            next_token_value = next_token.get_token_value()
+        next_type = next_token.get_token_type()
+        # check for empty paren
+        if next_type == ')':
+            closing_pos = next_token.get_token_pos()[0]
+            self._error_handler.add_error(
+                BaseCalcError(f"Invalid empty parentheses at position: {closing_pos - 1} -> {closing_pos}")
+            )
 
-            # check that the token before the paren is not a number or !
-            if prev_token is not None and (
-                    prev_token.get_token_type() == '!' or prev_token.get_token_type() == "Number"):
-                self._error_handler.add_error(BaseCalcError(
-                    f"Invalid token before opening parentheses at position: {token_list[cur_index].get_token_pos()[0]}"))
-
-            if isinstance(next_token_value, IBinaryOperator) or next_token_type == '!':
-                self._error_handler.add_error(BaseCalcError(
-                      f"Missing operands for token: {next_token_type} at position:"
-                    f" {token_list[cur_index + 1].get_token_pos()[0]}"))
-                return
-
-            elif next_token_type == ')':
-                closing_paren_index = token_list[cur_index + 1].get_token_pos()[0]
-                self._error_handler.add_error(BaseCalcError(
-                    f"Invalid empty parentheses at position: {closing_paren_index - 1} -> {closing_paren_index}"))
-                return
-
-        # closing paren
-        else:
-            prev_token_type = token_list[cur_index - 1].get_token_type()
-            prev_token_value = token_list[cur_index - 1].get_token_value()
-            if isinstance(prev_token_value, IBinaryOperator) or (
-                    prev_token_type != '!' and isinstance(prev_token_value, IUnaryOperator)):
-                self._error_handler.add_error(BaseCalcError(
-                    f"Missing operands for token: {prev_token_type} at position:"
-                    f" {token_list[cur_index - 1].get_token_pos()[0]}"))
-            # check that the token before the paren is not a number or !
-            if next_token is not None and (next_token.get_token_type() == "U-"
-                                             or next_token.get_token_type() == "Number"):
-                self._error_handler.add_error(BaseCalcError(
-                    f"Invalid token after closing parentheses at position: {token_list[cur_index].get_token_pos()[0]}"))
-
+    def _check_closing_paren(self, prev_token, next_token, pos):
+        """
+        Check all errors with closing paren
+        :param prev_token:
+        :param next_token:
+        :param pos:
+        :return:
+        """
+        if not prev_token:
+            self._error_handler.add_error(
+                BaseCalcError(f"Invalid ) at position: {pos} (no opening parenthesis)")
+            )
+            return
+        # check token after )
+        if next_token and next_token.get_token_type() in ["U-", "Number"]:
+            self._error_handler.add_error(
+                BaseCalcError(f"Invalid token after ) at position: {pos}")
+            )
 
     def _check_list_for_paren(self, paren_type: chr) -> bool:
         """
@@ -161,31 +146,14 @@ class Converter:
         :return:
         """
         current_op = token.get_token_value()
-        while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
-                self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(
-            self._output_lst) != 0:
-            self._output_lst.append(self._op_stack.pop())
-        self._op_stack.append(token)
-
-
-    def _check_unary_minus(self, cur_index, token_list):
-        """
-        Func that checks that a unary minus is in a correct place
-        :param cur_index:
-        :return:
-        """
-        if token_list[cur_index].get_token_type() == "U-":
-            if len(token_list) > 1:
-                next_token = token_list[cur_index + 1]
-
-                if next_token.get_token_type() != "Number" and next_token.get_token_type() != "(" and next_token.get_token_type() != "U-":
-                    # add the error to the error handler
-                    self._error_handler.add_error(BaseCalcError(
-                        f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"
-                        f" cannot come before: {next_token.get_token_type()}"))
-            else:
-                self._error_handler.add_error(BaseCalcError(
-                    f"Invalid use of unary minus operator at position: {token_list[cur_index].get_token_pos()[0]}"))
+        if self._check_for_sign_minus(cur_index, token_list):
+            # append sign minuses immediately
+            self._op_stack.append(self._unary_sign_token)
+        else:
+            while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
+                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(self._output_lst) != 0:
+                self._output_lst.append(self._op_stack.pop())
+            self._op_stack.append(token)
 
     def _handle_end_input(self):
         """
@@ -230,9 +198,93 @@ class Converter:
         """
         self._op_stack = []
         self._output_lst = []
+        self._signed_minus_indexes = []
 
-    def _check_factorial(self, cur_index, token_list):
-        if token_list[cur_index].get_token_type() == '!':
-            prev_token = token_list[cur_index - 1]
-            if prev_token.get_token_type() != ")" and prev_token.get_token_type() != "Number":
-                self._error_handler.add_error(BaseCalcError(f"Invalid use of ! operator at position: {token_list[cur_index].get_token_pos()[0]}"))
+    def _check_operator_placement(self, cur_index, token_list):
+        """
+        This func will check if an operator is placed in a valid way based on its placemnte
+        :param cur_index:
+        :param token_list:
+        :return:
+        """
+        if self._hit_missing_operands_error:
+            self._hit_missing_operands_error = False
+            return
+        current_token = token_list[cur_index]
+        current_token_placment = current_token.get_token_value().get_placement()
+        check_funcs_dict = {
+            "left": self._check_left_op,
+            "right": self._check_right_op,
+            "mid": self._check_mid_op,
+        }
+        func = check_funcs_dict[current_token_placment]
+        if not func(cur_index, token_list):
+            if current_token_placment != "mid":
+                self._error_handler.add_error(
+                    BaseCalcError(
+                        f"Invalid use of {current_token.get_token_value().get_op_value()} at position: {current_token.get_token_pos()[0]}"))
+            else:
+                self._error_handler.add_error(
+                    BaseCalcError(
+                        f"Missing operands for: {current_token.get_token_type()} at position: {current_token.get_token_pos()[0]}"))
+                if cur_index + 1 < len(token_list) and isinstance(token_list[cur_index + 1].get_token_value(),
+                                                                  Operator):
+                    self._hit_missing_operands_error = True
+
+    def _check_left_op(self, cur_index, token_list) -> bool:
+        """
+        Func to check the validity of a left sided operator
+        :param cur_index:
+        :param token_list:
+        :return: False if non valid, else true
+        """
+        cur_type = token_list[cur_index].get_token_type()
+        next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
+        if next_token is None:
+            return False
+        next_type = next_token.get_token_type()
+        if cur_type == '~':
+            return next_type in ("U-", "Number")
+        elif cur_type == "U-":
+            return next_type in ("Number", "(", "U-")
+        else:
+            return next_type in ("Number", "(", "U-", "~")
+
+    def _check_right_op(self, cur_index, token_list) -> bool:
+        """
+        Func to check the validity of a right sided operator
+        :param cur_index:
+        :param token_list:
+        :return: False if non valid, else true
+        """
+        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
+        prev_type = prev_token.get_token_type()
+        if prev_type is None:
+            return False
+        return prev_type in ("Number", ")", "!")
+
+    def _check_mid_op(self, cur_index, token_list) -> bool:
+        return self._check_right_op(cur_index, token_list) and self._check_left_op(cur_index, token_list)
+
+    def _check_for_sign_minus(self, cur_index, token_list) -> bool:
+        """
+        Func to check if a unary minus is a sign minus
+        A sign minus is the highest precedence op and must be pushed before anything else
+        :param cur_index:
+        :param token_list:
+        :return: True if it is a sign minus, False if it isnt
+        """
+        cur_type = token_list[cur_index].get_token_type()
+        cur_value = token_list[cur_index].get_token_value()
+        if cur_type != "U-":
+            return False
+        # if the prev minus was a signed one the current one is aswell
+        if cur_index != 0 and (cur_index - 1) in self._signed_minus_indexes:
+            self._signed_minus_indexes.append(cur_index)
+            return True
+        # token is U-
+        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
+        if prev_token is None or prev_token.get_token_type() == "(" or self.check_precedence(cur_value, prev_token.get_token_value()) >= 0:
+            return False
+        self._signed_minus_indexes.append(cur_index)
+        return True
