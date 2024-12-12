@@ -10,14 +10,16 @@ class CalcHandler:
     This class runs the calc it is only created once in main and ran by using run_calc
     """
 
+    def __init__(self):
+        self._error_handler = ErrorHandler()
+        self._tokenizer = Tokenizer(self._error_handler)
+        self._converter = Converter(self._error_handler)
+        self._evaluator = Evaluator(self._error_handler)
+
     def run_calc(self):
         """
         This is the main func in the class that handles the running of the calculator
         """
-        error_handler = ErrorHandler()
-        tokenizer = Tokenizer(error_handler)
-        converter = Converter(error_handler)
-        evaluator = Evaluator(error_handler)
         # print the instructions
         OutputHandler.output_main_instructions()
         while True:
@@ -28,37 +30,35 @@ class CalcHandler:
             elif input_exp.lower() == "op":
                 OutputHandler.output_op_data()
             else:
-                self._run_exp(input_exp, tokenizer, converter, evaluator, error_handler)
-                self._clear_values(tokenizer, converter, evaluator, error_handler)
+                result, error_list = self.run_single_exp(input_exp)
+                if error_list:
+                    self._error_handler.show_errors()
+                else:
+                    OutputHandler.output_data(result)
 
-    def _run_exp(self, input_exp, tokenizer, converter, evaluator, error_handler):
+    def run_single_exp(self, input_exp):
         """
-        This func is called in the run calc and inits all the parts for the calc and
-        if any errors are encountered they are shown and the calc process stops and waits for the next exp
-        :param input_exp:
-        :param tokenizer:
-        :param converter:
-        :param evaluator:
-        :param error_handler:
+        This func runs a single expression through the calculator and returns the final result or the
+        errors it encountered
+        :return: returns the final value or the errors the calc ran into
         """
+        # clear the prev values
+        self._clear_values()
         try:
-            tokenizer.tokenize_expression(input_exp)
-            converter.convert(tokenizer.get_tokens())
-            evaluator.eval(converter.get_post_fix())
-            OutputHandler.output_data(evaluator.get_final())
+            self._tokenizer.tokenize_expression(input_exp)
+            self._converter.convert(self._tokenizer.get_tokens())
+            self._evaluator.eval(self._converter.get_post_fix())
+            return self._evaluator.get_final(), None
         except StopIteration:
             # if we get a stopIteration then we had an error and we show all the errors
-            error_handler.show_errors()
+            errors = self._error_handler.get_errors()
+            return None, errors
 
-    def _clear_values(self, tokenizer, converter, evaluator, error_handler):
+    def _clear_values(self):
         """
         Func to clear all the old values in the calculator parts
-        :param evaluator:
-        :param tokenizer:
-        :param converter:
-        :param error_handler:
         """
-        tokenizer.clear_tokens()
-        error_handler.clear_errors()
-        converter.clear_converter()
-        evaluator.clear_evaluator()
+        self._tokenizer.clear_tokens()
+        self._error_handler.clear_errors()
+        self._converter.clear_converter()
+        self._evaluator.clear_evaluator()

@@ -7,6 +7,7 @@ class ErrorHandler:
     Class that handles all error handler funcs, this class will hold a list of the found errors and will be
     able to show the errors to the user by using the OutputHandler
     """
+
     def __init__(self):
         # this is the error list that will hold all the errors
         self._errorList = []
@@ -44,3 +45,9 @@ class ErrorHandler:
         """
         if self.has_errors():
             raise StopIteration
+
+    def get_errors(self):
+        """
+        Func that returns the contents of the error list
+        """
+        return self._errorList
