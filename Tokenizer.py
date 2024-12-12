@@ -1,6 +1,6 @@
 from ErrorHandler import ErrorHandler
 from Errors import BaseCalcError
-from Operators import OpData
+from Operators import OpData, IRightSidedOp
 
 
 class Tokenizer:
@@ -176,8 +176,7 @@ class Tokenizer:
             return '-'
         if len(self._token_list) == 0 or (
                 self._token_list[-1].get_token_type() not in ["Number", ")"] and
-                not isinstance(self._token_list[-1].get_token_value(), type(OpData.get_op_class('!')))):
-
+                not isinstance(self._token_list[-1].get_token_value(), IRightSidedOp)):
             return "U-"
         else:
             return '-'

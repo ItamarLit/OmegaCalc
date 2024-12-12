@@ -120,13 +120,6 @@ class Converter:
         :param next_token:
         :param pos:
         """
-
-        #if not prev_token:
-        #    self._error_handler.add_error(
-        #        BaseCalcError("Missing_Open_Paren", f"Invalid ) at position: {pos} (no opening parenthesis)")
-        #    )
-        #    return
-        # check token after )
         if next_token and next_token.get_token_type() in ["U-", "Number"]:
             self._error_handler.add_error(
                 BaseCalcError("Invalid_After_Close_Paren_Error", f"Invalid token after ) at position: {pos}")
@@ -247,8 +240,6 @@ class Converter:
             # for tilda we check that it isnt between two numbers as this is illegal we can do that
             # by checking if it is a valid right op and then we know it is invalid tilda usage
             return next_type in ("U-", "Number") and not self._check_right_op(cur_index, token_list)
-        elif cur_type == "U-":
-            return next_type in ("Number", "(", "U-")
         else:
             return next_type in ("Number", "(") or isinstance(next_value, ILeftSidedOp)
 

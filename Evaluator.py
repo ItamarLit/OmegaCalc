@@ -34,7 +34,14 @@ class Evaluator:
 
     def get_final(self):
         # get the final evaled num
-        return self._calculation_stack.pop()
+        # check if the value has decimal point
+        final_value = self._calculation_stack.pop()
+        if final_value % 1 == 0:
+            final_value = int(final_value)
+        else:
+            # show up to 6 digits after .
+            final_value = round(final_value, 6)
+        return final_value
 
     def handle_operator_token(self, token):
         """

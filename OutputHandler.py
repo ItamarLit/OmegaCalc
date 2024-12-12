@@ -13,9 +13,6 @@ class OutputHandler:
         Output func that will make the output an int value if it has no decimal numbers
         :param final_value:
         """
-        # check if the value has decimal point
-        if final_value % 1 == 0:
-            final_value = int(final_value)
         print(f"The value of the expression is: {final_value}")
 
     @staticmethod
