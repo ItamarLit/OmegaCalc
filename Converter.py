@@ -146,8 +146,8 @@ class Converter:
             self._op_stack.append(self._unary_sign_token)
         else:
             while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
-                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and len(
-                self._output_lst) != 0:
+                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and \
+                    len(self._output_lst) != 0:
                 self._output_lst.append(self._op_stack.pop())
             self._op_stack.append(token)
 
@@ -162,8 +162,9 @@ class Converter:
             for index in invalid_indexes:
                 # add the error
                 self._error_handler.add_error(
-                    BaseCalcError("Missing_Close_Paren_Error", "Missing Closing parentheses to opening parentheses at position: " + str(
-                        self._op_stack[index].get_token_pos()[0])))
+                    BaseCalcError("Missing_Close_Paren_Error",
+                                  "Missing Closing parentheses to opening parentheses at position: " + str(
+                                      self._op_stack[index].get_token_pos()[0])))
         else:
             while len(self._op_stack) != 0:
                 self._output_lst.append(self._op_stack.pop())
@@ -196,11 +197,11 @@ class Converter:
 
     def _check_operator_placement(self, cur_index: int, token_list: list):
         """
-        This func will check if an operator is placed in a valid way based on its placemnte
+        This func will check if an operator is placed in a valid way based on its placement and add an error if needed
         :param cur_index:
         :param token_list:
         """
-        if self._hit_missing_operands_error:
+        if self._hit_missing_operands_error and token_list[cur_index].get_token_value().get_placement() == "mid":
             self._hit_missing_operands_error = False
             return
         current_token = token_list[cur_index]
@@ -212,16 +213,58 @@ class Converter:
         }
         func = check_funcs_dict[current_token_placment]
         if not func(cur_index, token_list):
-            if current_token_placment != "mid":
-                self._error_handler.add_error(
-                    BaseCalcError("Invalid_Unary_Usage_Error",
-                        f"Invalid usage of: {current_token.get_token_value().get_op_value()} at position: {current_token.get_token_pos()[0]}"))
-            else:
+            if current_token_placment == "mid":
+                # missing operands for mid placed operator
                 self._error_handler.add_error(
                     BaseCalcError("Missing_Operands_Error",
-                        f"Missing operands for: {current_token.get_token_type()} at position: {current_token.get_token_pos()[0]}"))
-                if cur_index + 1 < len(token_list) and isinstance(token_list[cur_index + 1].get_token_value(), Operator):
-                    self._hit_missing_operands_error = True
+                                  f"Missing operands for: {current_token.get_token_type()} at position: {current_token.get_token_pos()[0]}"))
+
+                if cur_index + 1 < len(token_list):
+                    next_token = token_list[cur_index + 1].get_token_value()
+                    if isinstance(next_token, Operator) and next_token.get_placement() == "mid":
+                        self._hit_missing_operands_error = True
+            else:
+                token_value = current_token.get_token_value().get_op_value()
+                token_pos = current_token.get_token_pos()[0]
+                self._handle_unary_op_errors(cur_index, token_list, current_token_placment, token_value, token_pos)
+
+    def _handle_unary_op_errors(self, cur_index: int, token_list: list, current_token_placment: str,
+                                current_token_value: str, current_pos: int):
+        """
+        Func that handles the unary op errors (missing operands / invalid placment)
+        :param cur_index:
+        :param token_list:
+        :param current_token_placment:
+        :param current_token_value:
+        :param current_pos:
+        """
+        if self._check_has_error_token(cur_index, token_list, current_token_placment):
+            direction = "after" if current_token_placment == "right" else "before"
+            has_after = token_list[cur_index - 1] is not None if current_token_placment == "right" else \
+                token_list[cur_index + 1] is not None
+            error_token = token_list[cur_index - 1] if current_token_placment == "right" else token_list[cur_index + 1]
+            # add error for invalid use of unary operator
+            if has_after:
+                self._error_handler.add_error(BaseCalcError("Invalid_Unary_Usage_Error",
+                                                            f"Invalid usage of: {current_token_value} at position: {current_pos} "
+                                                            f"cannot come {direction}: {error_token.get_token_type()}"))
+        else:
+            # missing op error for unary operator
+            self._error_handler.add_error(
+                BaseCalcError("Invalid_Unary_Usage_Error",
+                              f"Invalid usage of: {current_token_value} at position: {current_pos} missing operand"))
+
+    def _check_has_error_token(self, cur_index: int, token_list: list, placement: str) -> bool:
+        """
+        Func that returns if there is a next token or before token based on the tokens placement
+        :param cur_index:
+        :param token_list:
+        :param placement:
+        """
+        if placement == "left":
+            return cur_index + 1 < len(token_list)
+        else:
+            return cur_index - 1 > len(token_list)
 
     def _check_left_op(self, cur_index: int, token_list: list) -> bool:
         """
@@ -238,9 +281,12 @@ class Converter:
         next_value = next_token.get_token_value()
         if cur_type == '~':
             # for tilda we check that it isnt between two numbers as this is illegal we can do that
-            # by checking if it is a valid right op and then we know it is invalid tilda usage
+            # by checking if it is not a valid right op and then we know it is invalid tilda usage
             return next_type in ("U-", "Number") and not self._check_right_op(cur_index, token_list)
+        elif cur_type == 'U-':
+            return next_type in ("U-", "Number", "(")
         else:
+            # if we want to add more left sided opps
             return next_type in ("Number", "(") or isinstance(next_value, ILeftSidedOp)
 
     def _check_right_op(self, cur_index: int, token_list: list) -> bool:

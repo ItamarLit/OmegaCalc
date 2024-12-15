@@ -38,9 +38,6 @@ class Evaluator:
         final_value = self._calculation_stack.pop()
         if final_value % 1 == 0:
             final_value = int(final_value)
-        else:
-            # show up to 6 digits after .
-            final_value = round(final_value, 6)
         return final_value
 
     def handle_operator_token(self, token):
@@ -55,9 +52,11 @@ class Evaluator:
             num_val = self._calculation_stack.pop()
             try:
                 self._calculation_stack.append(token_class.unary_evaluate(num_val))
-            except InvalidFactorialError:
-                self._error_handler.add_error(BaseCalcError( "Invalid_Factorial_Error",
-                    f"Cannot perform factorial at position: {token.get_token_pos()[0]} invalid factorial num: {num_val}"))
+            except InvalidFactorialError as e:
+                self._error_handler.add_error(BaseCalcError("Invalid_Factorial_Error", e))
+                self._encountered_fatal_error = True
+            except OverflowError as e:
+                self._error_handler.add_error(BaseCalcError("Factorial_Overflow_Error", e))
                 self._encountered_fatal_error = True
             except InvalidHashError:
                 self._error_handler.add_error(BaseCalcError("Invalid_Hash_Error",
@@ -65,7 +64,7 @@ class Evaluator:
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard
-                self._error_handler.add_error(BaseCalcError("Safe_Guard_Error" ,e))
+                self._error_handler.add_error(BaseCalcError("Safe_Guard_Error", e))
         else:
             second_operand = self._calculation_stack.pop()
             first_operand = self._calculation_stack.pop()
@@ -74,6 +73,12 @@ class Evaluator:
                 self._calculation_stack.append(token_class.binary_evaluate(first_operand, second_operand))
             except ZeroDivisionError:
                 self._error_handler.add_error(BaseCalcError("Zero_Div_Error", f"Cannot divide value by 0"))
+                self._encountered_fatal_error = True
+            except ValueError as e:
+                self._error_handler.add_error(BaseCalcError("Zero_Pow_Error", e))
+                self._encountered_fatal_error = True
+            except OverflowError as e:
+                self._error_handler.add_error(BaseCalcError("Pow_Overflow_Error", e))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard

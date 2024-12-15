@@ -100,12 +100,14 @@ class Power(IBinaryOperator, Operator):
     Class for the ^ op
     """
     def binary_evaluate(self, num1: float, num2: float) -> float:
-        if num2 <= 0 or num2 < 100 or num1 < 100:
-            return pow(num1, num2)
-        else:
-            num1 = int(num1)
-            num2 = int(num2)
-            return num1 ** num2
+        try:
+            result = pow(num1, num2)
+            # check if the value is to large or goes over the allowed float size
+            if result == float('inf') or result > 1.7976931348623157e+308:
+                raise OverflowError("Power operation result is too large.")
+            return result
+        except Exception as e:
+            raise ValueError(f"Invalid power operation, cannot raise: {num1} to the power of: {num2}")
 
 
 class Max(IBinaryOperator, Operator):
@@ -157,15 +159,20 @@ class Factorial(IUnaryOperator, Operator, IRightSidedOp):
     """
     Class for the ! op
     """
+    MAX_FACTORIAL_SIZE = 100000
 
-    def unary_evaluate(self, num1: int) -> int:
+    def unary_evaluate(self, num: int) -> int:
         factorial = 1
         # check for non positive number and non int number
-        if num1 < 0 or num1 % 1 != 0:
-            raise InvalidFactorialError("Cannot perform factorial on invalid number")
-        elif num1 > 0:
-            for i in range(1, int(num1 + 1)):
-                factorial = factorial * i
+        if num % 1 != 0:
+            raise InvalidFactorialError("Cannot perform factorial on non int number")
+        elif num < 0:
+            raise InvalidFactorialError("Cannot perform factorial on negative number")
+        # check to see if the factorial was to large
+        elif num >= self.MAX_FACTORIAL_SIZE:
+            raise OverflowError(f"Invalid factorial size, factorial of: {num} is too large")
+        for i in range(1, int(num + 1)):
+            factorial = factorial * i
         return factorial
 
 
