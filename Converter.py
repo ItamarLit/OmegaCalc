@@ -283,8 +283,10 @@ class Converter:
         """
         cur_type = token_list[cur_index].get_token_type()
         next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
+        # first check the more fatal error of having no next token (no operand)
         if next_token is None:
             return False, "None"
+        # after checking that there is another token check if it is a valid token
         next_type = next_token.get_token_type()
         next_value = next_token.get_token_value()
         if cur_type == 'U-' or cur_type == '~':
@@ -340,7 +342,7 @@ class Converter:
             return True
         # token is U-
         prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
-        if prev_token is None or prev_token.get_token_type() == "(":
+        if prev_token is None or prev_token.get_token_type() == "(" or prev_token.get_token_type() == "U-":
             return False
         self._signed_minus_indexes.append(cur_index)
         return True
