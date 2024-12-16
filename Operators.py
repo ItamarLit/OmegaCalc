@@ -102,11 +102,11 @@ class Power(IBinaryOperator, Operator):
     def binary_evaluate(self, num1: float, num2: float) -> float:
         try:
             result = pow(num1, num2)
-            # check if the value is to large or goes over the allowed float size
-            if result == float('inf') or result > 1.7976931348623157e+308:
-                raise OverflowError("Power operation result is too large.")
+            # check if the value goes over the allowed float size
+            if result > 1.7976931348623157e+308:
+                raise OverflowError()
             return result
-        except Exception as e:
+        except ValueError as e:
             raise ValueError(f"Invalid power operation, cannot raise: {num1} to the power of: {num2}")
 
 

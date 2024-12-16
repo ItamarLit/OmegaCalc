@@ -78,7 +78,7 @@ class Evaluator:
                 self._error_handler.add_error(BaseCalcError("Zero_Pow_Error", e))
                 self._encountered_fatal_error = True
             except OverflowError as e:
-                self._error_handler.add_error(BaseCalcError("Pow_Overflow_Error", e))
+                self._error_handler.add_error(BaseCalcError("Pow_Overflow_Error", "Power operation result is too large."))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard

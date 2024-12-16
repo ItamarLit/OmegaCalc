@@ -21,6 +21,7 @@ class Converter:
         self._op_stack = []
         self._hit_missing_operands_error = False
         self._signed_minus_indexes = []
+        # sign minus with higher priority
         self._unary_sign_token = Token("U-", UMinus(8, '-', "left", ""), -1, -1)
 
     def convert(self, token_list: list):
@@ -251,8 +252,8 @@ class Converter:
         else:
             # missing op error for unary operator
             self._error_handler.add_error(
-                BaseCalcError("Invalid_Unary_Usage_Error",
-                              f"Invalid usage of: {current_token_value} at position: {current_pos} missing operand"))
+                BaseCalcError("Missing_Operand_Error",
+                              f"Missing operand for: {current_token_value} at position: {current_pos}"))
 
     def _check_has_error_token(self, cur_index: int, token_list: list, placement: str) -> bool:
         """
