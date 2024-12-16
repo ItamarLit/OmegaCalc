@@ -28,9 +28,9 @@ def test_4(calc_handler):
 
 
 def test_5(calc_handler):
-    result, error_list = calc_handler.run_single_exp("~(2*3)")
+    result, error_list = calc_handler.run_single_exp("(-123)#")
     assert result is None
-    assert error_list[0].get_error_type() == "Invalid_Unary_Usage_Error"
+    assert error_list[0].get_error_type() == "Invalid_Hash_Error"
 
 
 def test_6(calc_handler):
