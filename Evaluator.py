@@ -6,8 +6,13 @@ from Operators import IUnaryOperator
 class Evaluator:
     """
     This class will evaluate the given postfix expression, it will catch the following errors:
-    1. invalid division attempt (by 0)
-    2. invalid attempt to use ! on a negative number
+    1. Invalid division attempt (by 0)
+    2. Invalid attempt to use ! on a negative number
+    3. Invalid attempt to use ! on a floating point number
+    4. ! overflow
+    5. Invalid attempt to do 0^(neg number)
+    6. Pow overflow
+    7. Invalid attempt to preform hash on a negative number
     Any error that occurs in this stage is a fatal one because we can't continue to evaluate if we can't preform an
     operation on a prev token, so when we encounter an error in this stage we stop the eval process
     """
@@ -33,7 +38,7 @@ class Evaluator:
         self._error_handler.check_errors()
 
     def get_final(self):
-        # get the final evaled num
+        # get the final num
         # check if the value has decimal point
         final_value = self._calculation_stack.pop()
         if final_value % 1 == 0:
@@ -60,7 +65,9 @@ class Evaluator:
                 self._encountered_fatal_error = True
             except InvalidHashError:
                 self._error_handler.add_error(BaseCalcError("Invalid_Hash_Error",
-                    f"Cannot perform hash at position: {token.get_token_pos()[0]} invalid negative num: {num_val}"))
+                                                            f"Cannot perform hash at position: "
+                                                            f"{token.get_token_pos()[0]}"
+                                                            f" invalid negative num: {num_val}"))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard
@@ -77,8 +84,10 @@ class Evaluator:
             except ValueError as e:
                 self._error_handler.add_error(BaseCalcError("Zero_Pow_Error", e))
                 self._encountered_fatal_error = True
-            except OverflowError as e:
-                self._error_handler.add_error(BaseCalcError("Pow_Overflow_Error", "Power operation result is too large."))
+            # catch the overflow error from the power without as because it is math range error
+            except OverflowError:
+                self._error_handler.add_error\
+                    (BaseCalcError("Pow_Overflow_Error", "Power operation result is too large."))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard
@@ -97,4 +106,3 @@ class Evaluator:
         """
         self._calculation_stack = []
         self._encountered_fatal_error = False
-

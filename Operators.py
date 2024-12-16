@@ -99,6 +99,7 @@ class Power(IBinaryOperator, Operator):
     """
     Class for the ^ op
     """
+
     def binary_evaluate(self, num1: float, num2: float) -> float:
         try:
             result = pow(num1, num2)
@@ -106,7 +107,7 @@ class Power(IBinaryOperator, Operator):
             if result > 1.7976931348623157e+308:
                 raise OverflowError()
             return result
-        except ValueError as e:
+        except ValueError:
             raise ValueError(f"Invalid power operation, cannot raise: {num1} to the power of: {num2}")
 
 
@@ -168,7 +169,7 @@ class Factorial(IUnaryOperator, Operator, IRightSidedOp):
             raise InvalidFactorialError("Cannot perform factorial on non int number")
         elif num < 0:
             raise InvalidFactorialError("Cannot perform factorial on negative number")
-        # check to see if the factorial was to large
+        # check to see if the factorial was too large
         elif num >= self.MAX_FACTORIAL_SIZE:
             raise OverflowError(f"Invalid factorial size, factorial of: {num} is too large")
         for i in range(1, int(num + 1)):
@@ -189,6 +190,7 @@ class Hash(IUnaryOperator, Operator, IRightSidedOp):
     """
     Class for the hash op
     """
+
     def unary_evaluate(self, num1: float) -> float:
         output = 0
         if num1 < 0:
@@ -217,7 +219,8 @@ class OpData(ABC):
         '~': Negative(6, '~', "left", "This is the negative operator"),
         '#': Hash(6, '#', "right", "This operator combines the digits of a positive number"),
         'U-': UMinus(2.5, '-', "left",
-                     "This is the unary minus operator it turns the sign of a given value to the negative of the current sign")
+                     "This is the unary minus operator it turns the sign of a given value to the negative of the "
+                     "current sign")
     }
 
     @staticmethod

@@ -5,16 +5,17 @@ from Operators import OpData, IRightSidedOp
 
 class Tokenizer:
     """
-    This class will check the input for invalid chars and will remove spaces
+    This class will check the input for invalid chars and will remove spaces, the class will create a list of all the
+    inputted tokens.
     The errors will be saved, possible errors in this state:
-    1. Invalid chars used in expression ie any char that is not in the valid tokens string
+    1. Invalid chars used in expression (any char that is not in the valid tokens string)
     2. Invalid Number format in expression ie 1234.. or 123.
-    3. Invalid usage of an operator (an op that can't start or end the exp)
+    3. Invalid Empty expression
     """
 
     def __init__(self, error_handler: ErrorHandler):
         # string of all valid chars
-        self._valid_tokens = "1234567890.+-*/&^%$@~!()"
+        self._valid_tokens = "1234567890.+-*/&^%$@~!()#"
         # list to hold all tokens, valid and invalid
         self._token_list = []
         # pattern for all valid numbers
@@ -24,10 +25,7 @@ class Tokenizer:
                         "Invalid_Char_Error": "Invalid Char found: ",
                         "Number_Error": "Invalid Number Format: ",
                         "Empty_Input_Error": "Invalid Input, The input must contain an expression",
-                        "Invalid_Usage": "Invalid Operator usage: ",
                         }
-        self._invalid_start_pattern = "+*/&^%$@!)"
-        self._invalid_end_pattern = "~@$%^&*(-+"
         self._error_handler = error_handler
         # func dict to handle all the input types
         self._funcs_dict = {
@@ -64,9 +62,7 @@ class Tokenizer:
                 cur_pos += 1
         else:
             # add an empty input error
-            self._error_handler.add_error(BaseCalcError("Empty_Input_Error",self._errors["Empty_Input_Error"]))
-        # handle invalid operators at the start and end of the token list
-        #self._handle_invalid_operators()
+            self._error_handler.add_error(BaseCalcError("Empty_Input_Error", self._errors["Empty_Input_Error"]))
         # check if we need to show errors
         self._error_handler.check_errors()
 
@@ -98,7 +94,8 @@ class Tokenizer:
         current_token_type = self._check_number(current_token_value)
         # create the error type if needed
         if current_token_type == "Number_Error":
-            current_token_value = self._create_error_msg_with_pos(current_token_value, current_token_type, (starting_pos, cur_pos))
+            current_token_value = \
+                self._create_error_msg_with_pos(current_token_value, current_token_type, (starting_pos, cur_pos))
         return current_token_value, current_token_type, cur_pos
 
     def _handle_operator(self, cleaned_exp: str, cur_pos: int):
@@ -172,7 +169,8 @@ class Tokenizer:
         :return: minus type
         """
         # make sure that (-) is a binary minus for future error handling
-        if len(self._token_list) >= 1 and self._token_list[-1].get_token_type() == '(' and len(cleaned_exp) >= 3 and cleaned_exp[cur_pos + 1] == ')':
+        if len(self._token_list) >= 1 and self._token_list[-1].get_token_type() == '(' and \
+                len(cleaned_exp) >= 3 and cleaned_exp[cur_pos + 1] == ')':
             return '-'
         if len(self._token_list) == 0 or (
                 self._token_list[-1].get_token_type() not in ["Number", ")"] and
@@ -198,27 +196,9 @@ class Tokenizer:
             current_token_value += cleaned_exp[cur_pos]
             cur_pos += 1
         cur_pos -= 1
-        current_token_value = self._create_error_msg_with_pos(current_token_value, current_token_type, (starting_pos, cur_pos))
+        current_token_value = \
+            self._create_error_msg_with_pos(current_token_value, current_token_type, (starting_pos, cur_pos))
         return current_token_value, current_token_type, cur_pos
-
-    def _handle_invalid_operators(self):
-        """
-        This func will add errors to the error handler if the starting op or the ending op are invalid in their context
-        :return:
-        """
-        if self._token_list:
-            # check first token
-            first_token = self._token_list[0]
-            last_token = self._token_list[-1]
-            error_data = self._errors["Invalid_Usage"]
-            if first_token.get_token_type() in self._invalid_start_pattern:
-                error_msg = self._create_error_msg_with_pos(error_data + first_token.get_token_type(), "Invalid_Usage", (first_token.get_token_pos()))
-                self._error_handler.add_error(BaseCalcError("Invalid_Usage",error_msg))
-
-            # check last token
-            if last_token.get_token_type() in self._invalid_end_pattern:
-                error_msg = self._create_error_msg_with_pos(error_data + last_token.get_token_type(), "Invalid_Usage", (last_token.get_token_pos()))
-                self._error_handler.add_error(BaseCalcError("Invalid_Usage", error_msg))
 
     def _create_error_msg_with_pos(self, token_value: str, error_type: str, error_pos: tuple) -> str:
         """
@@ -248,7 +228,8 @@ class Token:
         self._ending_index = ending_index
 
     def __str__(self):
-        return f"Token_type: {self._token_type} , Token_value: {self._token_value} , Token starts at: {self._starting_index} and ends at: {self._ending_index}"
+        return f"Token_type: {self._token_type} , Token_value: {self._token_value} ," \
+               f" Token starts at: {self._starting_index} and ends at: {self._ending_index}"
 
     def get_token_value(self):
         return self._token_value
