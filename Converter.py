@@ -281,25 +281,23 @@ class Converter:
         :param token_list:
         :return: False if non valid, else true
         """
-        cur_type = token_list[cur_index].get_token_type()
-        next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
+        cur_value = token_list[cur_index].get_token_value()
+        next_token, prev_token = self._get_next_and_prev_tokens(cur_index, token_list)
         # first check the more fatal error of having no next token (no operand)
         if next_token is None:
             return False, "None"
         # after checking that there is another token check if it is a valid token
         next_type = next_token.get_token_type()
-        next_value = next_token.get_token_value()
-        if cur_type == 'U-' or cur_type == '~':
-            # for tilda and unary minus check that the next token is either another unary minus a number or an
-            # open paren and the prev token isn't a number or ) or a right sided token (# or !)
+        if isinstance(cur_value, ILeftSidedOp):
+            # unary left sided ops can only come before a unary minus a number or an open paren
             if next_type not in ("U-", "Number", "("):
                 return False, "before"
-            elif self._check_right_op(cur_index, token_list)[0]:
+            # there cant be a number a closing paren or a right sided unary op before a left sided unary op
+            elif self._check_prev_token(prev_token, ("Number", ")")):
                 return False, "after"
             return True, "None"
-        else:
-            # if we want to add more left sided opps ( used for the mid-operator check )
-            return next_type in ("Number", "(") or isinstance(next_value, ILeftSidedOp), "None"
+        # this is used for the binary ops
+        return self._check_next_token(next_token, ("Number", "(")), "None"
 
     def _check_right_op(self, cur_index: int, token_list: list) -> tuple:
         """
@@ -308,19 +306,59 @@ class Converter:
         :param token_list:
         :return: False if non valid, else true
         """
-        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
-        cur_type = token_list[cur_index].get_token_type()
+        next_token, prev_token = self._get_next_and_prev_tokens(cur_index, token_list)
+        cur_value = token_list[cur_index].get_token_value()
         if prev_token is None:
             return False, "None"
         prev_type = prev_token.get_token_type()
         prev_value = prev_token.get_token_value()
-        if cur_type == "#" or cur_type == "!":
+        if isinstance(cur_value, IRightSidedOp):
+            # unary right sided operators can come after a number a closing paren or another right sided unary op
             if prev_type not in ("Number", ")") and not isinstance(prev_value, IRightSidedOp):
                 return False, "after"
-            elif self._check_left_op(cur_index, token_list)[0]:
+            # there cant be a number a opening paren or a left sided unary op after a right sided unary op
+            elif self._check_next_token(next_token, ("Number", "(")):
                 return False, "before"
             return True, "None"
-        return (prev_type in ("Number", ")") or isinstance(prev_value, IRightSidedOp)), "after"
+        # this is used for the binary ops
+        return self._check_prev_token(prev_token, ("Number", ")")), "after"
+
+    def _check_prev_token(self, prev_token: Token, valid_token_values: tuple) -> bool:
+        """
+        Func that checks if the prev token is valid (in the valid token values or is an instance of a right sided op)
+        :param prev_token:
+        :param valid_token_values:
+        :return: True if valid False if not
+        """
+        if prev_token is None:
+            return False
+        prev_type = prev_token.get_token_type()
+        prev_value = prev_token.get_token_value()
+        return prev_type in valid_token_values or isinstance(prev_value, IRightSidedOp)
+
+    def _check_next_token(self, next_token: Token, valid_token_values: tuple) -> bool:
+        """
+        Func that checks if the next token is valid (in the valid token values or is an instance of a left sided op)
+        :param next_token:
+        :param valid_token_values:
+        :return:
+        """
+        if next_token is None:
+            return False
+        next_type = next_token.get_token_type()
+        next_value = next_token.get_token_value()
+        return next_type in valid_token_values or isinstance(next_value, ILeftSidedOp)
+
+    def _get_next_and_prev_tokens(self, cur_index: int, token_list: list) -> tuple:
+        """
+        Func that gets the values of the prev and next token
+        :param cur_index:
+        :param token_list:
+        :return: the values of the tokens or None
+        """
+        prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
+        next_token = token_list[cur_index + 1] if cur_index + 1 < len(token_list) else None
+        return next_token, prev_token
 
     def _check_mid_op(self, cur_index: int, token_list: list) -> tuple:
         """

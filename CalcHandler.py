@@ -25,7 +25,7 @@ class CalcHandler:
         while True:
             input_exp = input("Enter an expression: ")
             if input_exp.lower() == "exit":
-                print("GoodBye remember: Omega>Sigit")
+                print("GoodBye")
                 break
             elif input_exp.lower() == "op":
                 OutputHandler.output_op_data()
