@@ -160,7 +160,7 @@ class Factorial(IUnaryOperator, Operator, IRightSidedOp):
     """
     Class for the ! op
     """
-    MAX_FACTORIAL_SIZE = 100000
+    MAX_FACTORIAL_SIZE = 10000
 
     def unary_evaluate(self, num: int) -> int:
         factorial = 1

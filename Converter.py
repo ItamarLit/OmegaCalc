@@ -309,10 +309,17 @@ class Converter:
         :return: False if non valid, else true
         """
         prev_token = token_list[cur_index - 1] if cur_index - 1 >= 0 else None
+        cur_type = token_list[cur_index].get_token_type()
         if prev_token is None:
             return False, "None"
         prev_type = prev_token.get_token_type()
         prev_value = prev_token.get_token_value()
+        if cur_type == "#" or cur_type == "!":
+            if prev_type not in ("Number", ")") and not isinstance(prev_value, IRightSidedOp):
+                return False, "after"
+            elif self._check_left_op(cur_index, token_list)[0]:
+                return False, "before"
+            return True, "None"
         return (prev_type in ("Number", ")") or isinstance(prev_value, IRightSidedOp)), "after"
 
     def _check_mid_op(self, cur_index: int, token_list: list) -> tuple:

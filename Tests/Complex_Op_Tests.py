@@ -98,6 +98,6 @@ def test_19(calc_handler):
     assert error_list is None
 
 def test_20(calc_handler):
-    result, error_list = calc_handler.run_single_exp("8#3*2+9!/(10&3^2)-~5%4")
-    assert result == 40323
+    result, error_list = calc_handler.run_single_exp("8#-3*2+9!/(10&3^2)-~5%4")
+    assert result == 40319
     assert error_list is None
