@@ -160,9 +160,9 @@ class Factorial(IUnaryOperator, Operator, IRightSidedOp):
     """
     Class for the ! op
     """
-    MAX_FACTORIAL_SIZE = 10000
+    MAX_FLOAT_SIZE = 170
 
-    def unary_evaluate(self, num: int) -> int:
+    def unary_evaluate(self, num: float) -> float:
         factorial = 1
         # check for non positive number and non int number
         if num % 1 != 0:
@@ -170,7 +170,7 @@ class Factorial(IUnaryOperator, Operator, IRightSidedOp):
         elif num < 0:
             raise InvalidFactorialError("Cannot perform factorial on negative number")
         # check to see if the factorial was too large
-        elif num >= self.MAX_FACTORIAL_SIZE:
+        elif num >= self.MAX_FLOAT_SIZE:
             raise OverflowError(f"Invalid factorial size, factorial of: {num} is too large")
         for i in range(1, int(num + 1)):
             factorial = factorial * i
@@ -196,7 +196,8 @@ class Hash(IUnaryOperator, Operator, IRightSidedOp):
         if num1 < 0:
             raise InvalidHashError("Invalid negative hash")
         for char in str(num1):
-            if char != '.':
+            # check that the char is a digit (used for floating numbers or numbers with e in them)
+            if char.isdigit():
                 output = output + int(char)
         return output
 
