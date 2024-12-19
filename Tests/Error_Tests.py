@@ -36,7 +36,13 @@ def test_overflow_power(calc_handler):
 def test_overflow_factorial(calc_handler):
     result, error_list = calc_handler.run_single_exp("100000000000!")
     assert result == None
-    assert error_list[0].get_error_type() == "Factorial_Overflow_Error"
+    assert error_list[0].get_error_type() == "Large_Number_Error"
+
+
+def test_overflow_hashtag(calc_handler):
+    result, error_list = calc_handler.run_single_exp("999999999999999999999999999999999999999999999.1#")
+    assert result == None
+    assert error_list[0].get_error_type() == "Large_Number_Error"
 
 
 def test_invalid_power_attempt(calc_handler):

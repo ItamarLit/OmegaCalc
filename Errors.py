@@ -27,17 +27,32 @@ class InvalidFactorialError(Exception):
     """
     Class for the invalid factorial attempt error
     """
+    pass
 
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
+
+class LargeNumberError(Exception):
+    """
+    Class for the large number error
+    """
+    pass
 
 
 class InvalidHashError(Exception):
     """
     Class for the negative hash attempt error
     """
+    pass
 
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
+
+class InvalidPowerError(Exception):
+    """
+    Class for the invalid power attempt error
+    """
+    pass
+
+
+class PowerOverflowError(Exception):
+    """
+    Class for the power overflow error
+    """
+    pass

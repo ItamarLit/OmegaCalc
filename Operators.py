@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import pow
-from Errors import InvalidFactorialError, InvalidHashError
+from Errors import *
 
 
 @dataclass
@@ -103,12 +103,11 @@ class Power(IBinaryOperator, Operator):
     def binary_evaluate(self, num1: float, num2: float) -> float:
         try:
             result = pow(num1, num2)
-            # check if the value goes over the allowed float size
-            if result > 1.7976931348623157e+308:
-                raise OverflowError()
             return result
         except ValueError:
-            raise ValueError(f"Invalid power operation, cannot raise: {num1} to the power of: {num2}")
+            raise InvalidPowerError(f"Invalid power operation, cannot raise: {num1} to the power of: {num2}")
+        except OverflowError:
+            raise PowerOverflowError(f"Power operation result is too large, cannot preform {num1}^{num2}")
 
 
 class Max(IBinaryOperator, Operator):
@@ -171,7 +170,7 @@ class Factorial(IUnaryOperator, Operator, IRightSidedOp):
             raise InvalidFactorialError("Cannot perform factorial on negative number")
         # check to see if the factorial was too large
         elif num >= self.MAX_FLOAT_SIZE:
-            raise OverflowError(f"Invalid factorial size, factorial of: {num} is too large")
+            raise LargeNumberError(f"Invalid factorial size, factorial of: {num} is too large")
         for i in range(1, int(num + 1)):
             factorial = factorial * i
         return factorial
@@ -195,6 +194,8 @@ class Hash(IUnaryOperator, Operator, IRightSidedOp):
         output = 0
         if num1 < 0:
             raise InvalidHashError("Invalid negative hash")
+        if 'e' in str(num1):
+            raise LargeNumberError(f"Invalid large number for # operator, cannot preform function on: {num1}")
         for char in str(num1):
             # check that the char is a digit (used for floating numbers or numbers with e in them)
             if char.isdigit():

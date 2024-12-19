@@ -1,5 +1,5 @@
 from ErrorHandler import ErrorHandler
-from Errors import BaseCalcError, InvalidFactorialError, InvalidHashError
+from Errors import *
 from Operators import IUnaryOperator
 
 
@@ -60,8 +60,8 @@ class Evaluator:
             except InvalidFactorialError as e:
                 self._error_handler.add_error(BaseCalcError("Invalid_Factorial_Error", e))
                 self._encountered_fatal_error = True
-            except OverflowError as e:
-                self._error_handler.add_error(BaseCalcError("Factorial_Overflow_Error", e))
+            except LargeNumberError as e:
+                self._error_handler.add_error(BaseCalcError("Large_Number_Error", e))
                 self._encountered_fatal_error = True
             except InvalidHashError:
                 self._error_handler.add_error(BaseCalcError("Invalid_Hash_Error",
@@ -81,13 +81,12 @@ class Evaluator:
             except ZeroDivisionError:
                 self._error_handler.add_error(BaseCalcError("Zero_Div_Error", f"Cannot divide value by 0"))
                 self._encountered_fatal_error = True
-            except ValueError as e:
+            except InvalidPowerError as e:
                 self._error_handler.add_error(BaseCalcError("Zero_Pow_Error", e))
                 self._encountered_fatal_error = True
             # catch the overflow error from the power without as because it is math range error
-            except OverflowError:
-                self._error_handler.add_error\
-                    (BaseCalcError("Pow_Overflow_Error", "Power operation result is too large."))
+            except PowerOverflowError as e:
+                self._error_handler.add_error(BaseCalcError("Pow_Overflow_Error", e))
                 self._encountered_fatal_error = True
             except Exception as e:
                 # this should never happen but is used as a safeguard
