@@ -151,8 +151,8 @@ class UMinus(IUnaryOperator, Operator, ILeftSidedOp):
     Class for the unary minus
     """
 
-    def unary_evaluate(self, num1: float) -> float:
-        return num1 * -1
+    def unary_evaluate(self, num: float) -> float:
+        return num * -1
 
 
 class Factorial(IUnaryOperator, Operator, IRightSidedOp):
@@ -181,8 +181,8 @@ class Negative(IUnaryOperator, Operator, ILeftSidedOp):
     Class for the ~ op
     """
 
-    def unary_evaluate(self, num1: float) -> float:
-        return num1 * -1
+    def unary_evaluate(self, num: float) -> float:
+        return num * -1
 
 
 class Hash(IUnaryOperator, Operator, IRightSidedOp):
@@ -190,13 +190,19 @@ class Hash(IUnaryOperator, Operator, IRightSidedOp):
     Class for the hash op
     """
 
-    def unary_evaluate(self, num1: float) -> float:
+    def unary_evaluate(self, num: float) -> float:
         output = 0
-        if num1 < 0:
-            raise InvalidHashError("Invalid negative hash")
-        if 'e' in str(num1):
-            raise LargeNumberError(f"Invalid large number for # operator, cannot preform function on: {num1}")
-        for char in str(num1):
+        if num < 0:
+            raise InvalidHashError(f"Cannot perform hash on negative num: {num}")
+        # check for small numbers
+        elif num < 1e-10 and num != 0:
+            raise SmallNumberError(f"Invalid small number for # operator, cannot preform function on: {num}")
+        # check for large numbers, python float loses precision after 15 digits
+        elif num > 999999999999999.9:
+            raise LargeNumberError(f"Invalid large number for # operator, cannot preform function on: {num}")
+        # take only the non zero part if there is an e in the number
+        num = str(num).split('e')
+        for char in num[0]:
             # check that the char is a digit (used for floating numbers or numbers with e in them)
             if char.isdigit():
                 output = output + int(char)
@@ -212,17 +218,18 @@ class OpData(ABC):
         '-': Minus(1, '-', "mid", "This operator subtracts two operands"),
         '*': Multiplication(2, '*', "mid", "This operator multiplies two operands"),
         '/': Division(2, '/', "mid", "This operator divides two operands"),
-        '&': Min(5, '&', "mid", "This operator gives the minimum between two operands"),
+        'U-': UMinus(2.5, '-', "left",
+                     "This is the unary minus operator it turns the sign of a given value to the negative of the "
+                     "current sign"),
         '^': Power(3, '^', "mid", "This operator is the power operator"),
         '%': Modulo(4, '%', "mid", "This operator is the modulo operator"),
+        '&': Min(5, '&', "mid", "This operator gives the minimum between two operands"),
         '$': Max(5, '$', "mid", "This operator gives the maximum between two operands"),
         '@': Avg(5, '@', "mid", "This operator gives the average between two operands"),
         '!': Factorial(6, '!', "right", "This operator returns the factorial of a a single un-negative operand"),
         '~': Negative(6, '~', "left", "This is the negative operator"),
         '#': Hash(6, '#', "right", "This operator combines the digits of a positive number"),
-        'U-': UMinus(2.5, '-', "left",
-                     "This is the unary minus operator it turns the sign of a given value to the negative of the "
-                     "current sign")
+
     }
 
     @staticmethod

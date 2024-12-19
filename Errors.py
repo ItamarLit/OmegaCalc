@@ -37,6 +37,13 @@ class LargeNumberError(Exception):
     pass
 
 
+class SmallNumberError(Exception):
+    """
+    Class for the small number error
+    """
+    pass
+
+
 class InvalidHashError(Exception):
     """
     Class for the negative hash attempt error

@@ -16,7 +16,7 @@ class Converter:
     5. Missing operands / operand for binary and unary ops
     6. Invalid usage of unary ops (according to the rules)
     The output list will be a list of tokens in postfix so that
-     I can give better errors in the evaluator (get the position of the error)
+    I can give better errors in the evaluator (get the position of the error)
     """
 
     def __init__(self, error_handler: ErrorHandler):
@@ -26,7 +26,7 @@ class Converter:
         self._hit_missing_operands_error = False
         self._signed_minus_indexes = []
         # sign minus with higher priority
-        self._unary_sign_token = Token("U-", UMinus(8, '-', "left", ""), -1, -1)
+        self._unary_sign_token = Token("U-", UMinus(7, '-', "left", ""), -1, -1)
 
     def convert(self, token_list: list):
         """
