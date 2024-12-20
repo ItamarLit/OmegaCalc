@@ -228,6 +228,7 @@ class Token:
         self._ending_index = ending_index
 
     def __str__(self):
+        # used for debugging
         return f"Token_type: {self._token_type} , Token_value: {self._token_value} ," \
                f" Token starts at: {self._starting_index} and ends at: {self._ending_index}"
 

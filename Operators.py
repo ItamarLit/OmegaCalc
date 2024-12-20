@@ -198,7 +198,7 @@ class Hash(IUnaryOperator, Operator, IRightSidedOp):
         elif num < 1e-10 and num != 0:
             raise SmallNumberError(f"Invalid small number for # operator, cannot preform function on: {num}")
         # check for large numbers, python float loses precision after 15 digits
-        elif num > 999999999999999.9:
+        elif num > 1e15:
             raise LargeNumberError(f"Invalid large number for # operator, cannot preform function on: {num}")
         # take only the non zero part if there is an e in the number
         num = str(num).split('e')

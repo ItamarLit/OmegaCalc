@@ -150,7 +150,7 @@ class Converter:
             self._op_stack.append(self._unary_sign_token)
         else:
             while len(self._op_stack) != 0 and self._op_stack[-1].get_token_value() != '(' and \
-                    self.check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and \
+                    self._check_precedence(current_op, self._op_stack[-1].get_token_value()) <= 0 and \
                     len(self._output_lst) != 0:
                 self._output_lst.append(self._op_stack.pop())
             self._op_stack.append(token)
@@ -173,7 +173,7 @@ class Converter:
             while len(self._op_stack) != 0:
                 self._output_lst.append(self._op_stack.pop())
 
-    def check_precedence(self, op_token1: Operator, op_token2: Operator) -> float:
+    def _check_precedence(self, op_token1: Operator, op_token2: Operator) -> float:
         """
         This func will return:
         neg num if op1 < op2
