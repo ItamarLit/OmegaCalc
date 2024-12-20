@@ -1,8 +1,8 @@
-from Converter import Converter
-from ErrorHandler import ErrorHandler
-from Tokenizer import Tokenizer
-from Evaluator import Evaluator
-from OutputHandler import OutputHandler
+from CalcParts.Converter import Converter
+from ErrorParts.ErrorHandler import ErrorHandler
+from CalcParts.Tokenizer import Tokenizer
+from CalcParts.Evaluator import Evaluator
+from CalcParts.OutputHandler import OutputHandler
 
 
 class CalcHandler:

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import pow
-from Errors import *
+from ErrorParts.Errors import *
 
 
 @dataclass

@@ -1,5 +1,5 @@
-from Operators import OpData
-from Errors import BaseCalcError
+from CalcParts.Operators import OpData
+from ErrorParts.Errors import BaseCalcError
 
 
 class OutputHandler:

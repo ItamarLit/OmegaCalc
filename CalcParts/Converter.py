@@ -1,7 +1,7 @@
-from ErrorHandler import ErrorHandler
-from Operators import Operator, UMinus, ILeftSidedOp, IRightSidedOp
-from Errors import BaseCalcError
-from Tokenizer import Token
+from ErrorParts.ErrorHandler import ErrorHandler
+from CalcParts.Operators import Operator, UMinus, ILeftSidedOp, IRightSidedOp
+from ErrorParts.Errors import BaseCalcError
+from CalcParts.Tokenizer import Token
 
 
 class Converter:

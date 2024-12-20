@@ -1,6 +1,6 @@
-from ErrorHandler import ErrorHandler
-from Errors import BaseCalcError
-from Operators import OpData, IRightSidedOp
+from ErrorParts.ErrorHandler import ErrorHandler
+from ErrorParts.Errors import BaseCalcError
+from CalcParts.Operators import OpData, IRightSidedOp
 
 
 class Tokenizer:

@@ -1,6 +1,6 @@
-from ErrorHandler import ErrorHandler
-from Errors import *
-from Operators import IUnaryOperator
+from ErrorParts.ErrorHandler import ErrorHandler
+from ErrorParts.Errors import *
+from CalcParts.Operators import IUnaryOperator
 
 
 class Evaluator:

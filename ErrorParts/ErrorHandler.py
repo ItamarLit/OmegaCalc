@@ -1,5 +1,5 @@
-from Errors import BaseCalcError
-from OutputHandler import OutputHandler
+from ErrorParts.Errors import BaseCalcError
+from CalcParts.OutputHandler import OutputHandler
 
 
 class ErrorHandler:
