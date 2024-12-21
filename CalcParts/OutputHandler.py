@@ -31,7 +31,8 @@ class OutputHandler:
 
     @staticmethod
     def output_main_instructions():
-        print("Welcome to my special calculator, to see all the valid operators please write: op")
+        print("Welcome to my special calculator,"
+              " to see all the valid operators please write: op. To exit the calc write: exit")
 
     @staticmethod
     def output_error(error: BaseCalcError):
