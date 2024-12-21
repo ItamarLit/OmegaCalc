@@ -25,7 +25,7 @@ class Converter:
         self._op_stack = []
         self._hit_missing_operands_error = False
         self._signed_minus_indexes = []
-        # sign minus with higher priority
+        # sign minus with the highest priority
         self._unary_sign_token = Token("U-", UMinus(7, '-', "left", ""), -1, -1)
 
     def convert(self, token_list: list):
@@ -131,7 +131,7 @@ class Converter:
 
     def _check_list_for_paren(self, paren_type: chr) -> bool:
         """
-        Func to check if the op_stack has an opening parentheses
+        Func to check if the op_stack has parentheses of paren_type
         :return:
         """
         for token in self._op_stack:

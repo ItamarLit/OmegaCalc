@@ -10,7 +10,7 @@ class Evaluator:
     2. Invalid attempt to use ! on a negative number
     3. Invalid attempt to use ! on a floating point number
     4. ! overflow
-    5. Invalid attempt to do 0^(neg number)
+    5. Invalid attempt to use pow
     6. Pow overflow
     7. Invalid attempt to preform hash on a negative number
     8. Invalid attempt to preform hash on a very small / very large number

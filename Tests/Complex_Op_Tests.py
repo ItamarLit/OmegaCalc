@@ -58,7 +58,7 @@ def test_9(calc_handler):
 
 
 def test_10(calc_handler):
-    result, error_list = calc_handler.run_single_exp("((5!+6^3)@((7%2)$9))#-~3^2")
+    result, error_list = calc_handler.run_single_exp("((5!+6^      3)@((7%2)$9))#-~3^2")
     assert result == 6
     assert error_list is None
 
@@ -70,37 +70,37 @@ def test_11(calc_handler):
 
 
 def test_12(calc_handler):
-    result, error_list = calc_handler.run_single_exp("((-(15*3)%8)+7)-~4^2$5")
+    result, error_list = calc_handler.run_single_exp("((-(15*3  )%8)+7)-~4^2$5")
     assert result == 1026
     assert error_list is None
 
 
 def test_13(calc_handler):
-    result, error_list = calc_handler.run_single_exp("(12+(-8%3)^4@6)-~5*9$7")
+    result, error_list = calc_handler.run_single_exp("(12   +(-8%3)^4@6)-~5*9$7")
     assert result == 25
     assert error_list is None
 
 
 def test_14(calc_handler):
-    result, error_list = calc_handler.run_single_exp("((8$3)&(10%3)^(2*4))@5^2.5")
+    result, error_list = calc_handler.run_single_exp("(( 8$3)&(10%3 )^(2*4))@5^2.5")
     assert result == 15.588457268119896
     assert error_list is None
 
 
 def test_15(calc_handler):
-    result, error_list = calc_handler.run_single_exp("(((~5)*9)@((2.0^3)+(4!))@6.5)#")
+    result, error_list = calc_handler.run_single_exp("(((~5)*9)@    ((2.0^3)+(4!))@ 6.5)#")
     assert result == 0
     assert error_list is None
 
 
 def test_16(calc_handler):
-    result, error_list = calc_handler.run_single_exp("(((10/2)^(~3$7))%5!*3#)^2")
+    result, error_list = calc_handler.run_single_exp("(((   10/2)^(~3$7    ))%5!*3#)^2")
     assert result == 225
     assert error_list is None
 
 
 def test_17(calc_handler):
-    result, error_list = calc_handler.run_single_exp("(((9!@3)-(10&2))/(~4)*-2)#")
+    result, error_list = calc_handler.run_single_exp("( ((9!@3)-(10&2))/(~4     )*-2 )#")
     assert result == 38
     assert error_list is None
 

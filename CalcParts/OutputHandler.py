@@ -8,9 +8,10 @@ class OutputHandler:
     """
 
     @staticmethod
-    def output_data(final_value: float):
+    def output_data(final_value):
         """
-        Output func that will make the output an int value if it has no decimal numbers
+        Output func that will show the final value of the expression (this can be an int or a float), I convert the
+        final value if needed so it looks better (0.0 = 0, 1.0 = 1 and so on)
         :param final_value:
         """
         print(f"The value of the expression is: {final_value}")

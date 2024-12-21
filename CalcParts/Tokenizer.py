@@ -157,7 +157,7 @@ class Tokenizer:
         """
         return self._token_list
 
-    def clear_tokens(self):
+    def clear_tokenizer(self):
         """
         Func that clears the used token list
         """

@@ -1,6 +1,8 @@
 class BaseCalcError:
     """
-    Base error class used to hold the error msg
+    Base error class used to hold the error msg for errors in the tokenizer and converter so that the user will get
+    multiple errors if there are, in the evaluator every error is critical as we can't continue to evaluate if we hit
+    one so the evaluator uses custom exceptions to catch errors.
     """
 
     def __init__(self, error_type, error_msg):
@@ -46,7 +48,7 @@ class SmallNumberError(Exception):
 
 class InvalidHashError(Exception):
     """
-    Class for the negative hash attempt error
+    Class for the invalid hash attempt error
     """
     pass
 

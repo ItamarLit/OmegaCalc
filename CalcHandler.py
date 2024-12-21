@@ -61,7 +61,7 @@ class CalcHandler:
         """
         Func to clear all the old values in the calculator parts
         """
-        self._tokenizer.clear_tokens()
+        self._tokenizer.clear_tokenizer()
         self._error_handler.clear_errors()
         self._converter.clear_converter()
         self._evaluator.clear_evaluator()
