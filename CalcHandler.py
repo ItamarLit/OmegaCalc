@@ -22,27 +22,27 @@ class CalcHandler:
         """
         # print the instructions
         OutputHandler.output_main_instructions()
-        # check for a keyboard interrupt error
-        try:
-            while True:
-                # check for EOF error in the input
-                try:
-                    input_exp = input("Enter an expression: ")
-                    if input_exp.lower() == "exit":
-                        print("The program was closed, goodbye")
-                        break
-                    elif input_exp.lower() == "op":
-                        OutputHandler.output_op_data()
+        while True:
+            try:
+                input_exp = input("Enter an expression: ")
+                if input_exp.lower() == "exit":
+                    print("The program was closed, goodbye")
+                    break
+                elif input_exp.lower() == "op":
+                    OutputHandler.output_op_data()
+                else:
+                    result, error_list = self.run_single_exp(input_exp)
+                    if error_list:
+                        self._error_handler.show_errors()
                     else:
-                        result, error_list = self.run_single_exp(input_exp)
-                        if error_list:
-                            self._error_handler.show_errors()
-                        else:
-                            OutputHandler.output_data(result)
-                except EOFError:
-                    print("Sorry can't close me like that, please write: exit")
-        except KeyboardInterrupt:
-            print("\nThe program was forcefully closed, goodbye")
+                        OutputHandler.output_data(result)
+            except EOFError:
+                # check for EOF error in the input
+                print("Sorry can't close me like that, please write: exit")
+            except KeyboardInterrupt:
+                # check for a keyboard interrupt error
+                print("\nThe program was forcefully closed, goodbye")
+                break
 
     def run_single_exp(self, input_exp):
         """
