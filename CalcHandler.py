@@ -38,6 +38,8 @@ class CalcHandler:
                         OutputHandler.output_data(result)
         except KeyboardInterrupt:
             print("\nThe program was forcefully closed, goodbye")
+        except EOFError:
+            print("\nThe program was forcefully closed, goodbye")
 
     def run_single_exp(self, input_exp):
         """
