@@ -20,25 +20,28 @@ class CalcHandler:
         """
         This is the main func in the class that handles the running of the calculator
         """
+        # print the instructions
+        OutputHandler.output_main_instructions()
+        # check for a keyboard interrupt error
         try:
-            # print the instructions
-            OutputHandler.output_main_instructions()
             while True:
-                input_exp = input("Enter an expression: ")
-                if input_exp.lower() == "exit":
-                    print("The program was closed, goodbye")
-                    break
-                elif input_exp.lower() == "op":
-                    OutputHandler.output_op_data()
-                else:
-                    result, error_list = self.run_single_exp(input_exp)
-                    if error_list:
-                        self._error_handler.show_errors()
+                # check for EOF error in the input
+                try:
+                    input_exp = input("Enter an expression: ")
+                    if input_exp.lower() == "exit":
+                        print("The program was closed, goodbye")
+                        break
+                    elif input_exp.lower() == "op":
+                        OutputHandler.output_op_data()
                     else:
-                        OutputHandler.output_data(result)
+                        result, error_list = self.run_single_exp(input_exp)
+                        if error_list:
+                            self._error_handler.show_errors()
+                        else:
+                            OutputHandler.output_data(result)
+                except EOFError:
+                    print("Sorry can't close me like that, please write: exit")
         except KeyboardInterrupt:
-            print("\nThe program was forcefully closed, goodbye")
-        except EOFError:
             print("\nThe program was forcefully closed, goodbye")
 
     def run_single_exp(self, input_exp):
